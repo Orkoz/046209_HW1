@@ -8,23 +8,17 @@ main file. This file contains the main function of smash
 #include <stdlib.h>
 #include <string.h>
 #include <signal.h>
+#include <list>
+#include "job.h"
 #include "commands.h"
 #include "signals.h"
 #define MAX_LINE_SIZE 80
 #define MAXARGS 20
 
-struct job{
-	char* name;
-	int pid;
-	int time;
-};
-
-void stop_jobs(){
-
-}
+using namespace std;
 
 char* L_Fg_Cmd;
-struct job* jobs = NULL; //This represents the list of jobs. Please change to a preferred type (e.g array of char*)
+list<job> jobs; //This represents the list of jobs. Please change to a preferred type (e.g array of char*)
 char lineSize[MAX_LINE_SIZE];
 //**************************************************************************************
 // function name: main
@@ -41,7 +35,7 @@ int main(int argc, char *argv[])
 
     struct sigaction act;
     act.sa_handler = &catch_ctrl_z;
-    sigaction(SIGTSTP);
+    sigaction(SIGTSTP,&act,NULL);
 
 	/************************************/
 	//NOTE: the signal handlers and the function/s that sets the handler should be found in siganls.c
