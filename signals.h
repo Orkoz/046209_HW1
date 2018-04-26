@@ -9,6 +9,8 @@
 #include <signal.h>
 
 
-
 #endif
+
+void catch_ctrl_z(int sig_num);
+
 

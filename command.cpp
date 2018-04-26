@@ -1,4 +1,4 @@
-//		commands.c
+//		commands.cpp
 //********************************************
 #include "commands.h"
 //********************************************
@@ -9,70 +9,70 @@
 //**************************************************************************************
 int ExeCmd(void* jobs, char* lineSize, char* cmdString)
 {
-	char* cmd; 
+	char* cmd;
 	char* args[MAX_ARG];
 	char pwd[MAX_LINE_SIZE];
-	char* delimiters = " \t\n";  
+	char* delimiters = " \t\n";
 	int i = 0, num_arg = 0;
 	bool illegal_cmd = FALSE; // illegal command
     	cmd = strtok(lineSize, delimiters);
 	if (cmd == NULL)
-		return 0; 
+		return 0;
    	args[0] = cmd;
 	for (i=1; i<MAX_ARG; i++)
 	{
-		args[i] = strtok(NULL, delimiters); 
-		if (args[i] != NULL) 
-			num_arg++; 
- 
+		args[i] = strtok(NULL, delimiters);
+		if (args[i] != NULL)
+			num_arg++;
+
 	}
 /*************************************************/
 // Built in Commands PLEASE NOTE NOT ALL REQUIRED
 // ARE IN THIS CHAIN OF IF COMMANDS. PLEASE ADD
 // MORE IF STATEMENTS AS REQUIRED
 /*************************************************/
-	if (!strcmp(cmd, "cd") ) 
+	if (!strcmp(cmd, "cd") )
 	{
-		
-	} 
-	
-	/*************************************************/
-	else if (!strcmp(cmd, "pwd")) 
-	{
-		
+
 	}
-	
+
+	/*************************************************/
+	else if (!strcmp(cmd, "pwd"))
+	{
+
+	}
+
 	/*************************************************/
 	else if (!strcmp(cmd, "mkdir"))
 	{
- 		
+
 	}
 	/*************************************************/
-	
-	else if (!strcmp(cmd, "jobs")) 
+
+	else if (!strcmp(cmd, "jobs"))
 	{
- 		
+
 	}
 	/*************************************************/
-	else if (!strcmp(cmd, "showpid")) 
+	else if (!strcmp(cmd, "showpid"))
 	{
-		
+
 	}
 	/*************************************************/
-	else if (!strcmp(cmd, "fg")) 
+	else if (!strcmp(cmd, "fg"))
 	{
-		
-	} 
+
+	}
 	/*************************************************/
-	else if (!strcmp(cmd, "bg")) 
+	else if (!strcmp(cmd, "bg"))
 	{
-  		
+
 	}
 	/*************************************************/
 	else if (!strcmp(cmd, "quit"))
 	{
-   		
-	} 
+
+	}
 	/*************************************************/
 	else // external command
 	{
@@ -95,28 +95,28 @@ int ExeCmd(void* jobs, char* lineSize, char* cmdString)
 void ExeExternal(char *args[MAX_ARG], char* cmdString)
 {
 	int pID;
-    	switch(pID = fork()) 
+    	switch(pID = fork())
 	{
-    		case -1: 
+    		case -1:
 					// Add your code here (error)
-					
-					/* 
+
+					/*
 					your code
 					*/
         	case 0 :
                 	// Child Process
                		setpgrp();
-					
+
 			        // Add your code here (execute an external command)
-					
-					/* 
+
+					/*
 					your code
 					*/
-			
+
 			default:
                 	// Add your code here
-					
-					/* 
+
+					/*
 					your code
 					*/
 	}
@@ -144,7 +144,7 @@ int ExeComp(char* lineSize)
 
     	ExeExternal(args, cmd);
     	return 0;
-	} 
+	}
 	return -1;
 }
 //**************************************************************************************
@@ -163,12 +163,14 @@ int BgCmd(char* lineSize, void* jobs)
 	{
 		lineSize[strlen(lineSize)-2] = '\0';
 		// Add your code here (execute a in the background)
-					
-		/* 
+
+		/*
 		your code
 		*/
-		
+
 	}
 	return -1;
 }
+
+
 
