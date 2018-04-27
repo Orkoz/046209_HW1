@@ -7,10 +7,10 @@
 // Parameters: pointer to jobs, command string
 // Returns: 0 - success,1 - failure
 //**************************************************************************************
-int ExeCmd(void* jobs, char* lineSize, char* cmdString)
+int ExeCmd(void* jobs, char* lineSize, char* cmdString, bool background_flag)
 {
 	char* cmd;
-	char* args[MAX_ARG];
+	char* args[MAX_ARG+3]; // 3 for complicated command 'csh -f -c'];
 	char pwd[MAX_LINE_SIZE];
 	char* delimiters = " \t\n";
 	int i = 0, num_arg = 0;
@@ -19,7 +19,7 @@ int ExeCmd(void* jobs, char* lineSize, char* cmdString)
 	if (cmd == NULL)
 		return 0;
    	args[0] = cmd;
-	for (i=1; i<MAX_ARG; i++)
+	for (i=1; i<MAX_ARG+3; i++) // 3 for complicated command 'csh -f -c'];
 	{
 		args[i] = strtok(NULL, delimiters);
 		if (args[i] != NULL)
@@ -76,7 +76,7 @@ int ExeCmd(void* jobs, char* lineSize, char* cmdString)
 	/*************************************************/
 	else // external command
 	{
- 		ExeExternal(args, cmdString);
+ 		ExeExternal(args, cmdString, background_flag);
 	 	return 0;
 	}
 	if (illegal_cmd == TRUE)
@@ -92,7 +92,7 @@ int ExeCmd(void* jobs, char* lineSize, char* cmdString)
 // Parameters: external command arguments, external command string
 // Returns: void
 //**************************************************************************************
-void ExeExternal(char *args[MAX_ARG], char* cmdString)
+void ExeExternal(char *args[MAX_ARG+3], char* cmdString, void* jobs, bool background_flag)// 3 for complicated command 'csh -f -c'];
 {
 	int pID;
     	switch(pID = fork())
@@ -106,46 +106,43 @@ void ExeExternal(char *args[MAX_ARG], char* cmdString)
         	case 0 :
                 	// Child Process
                		setpgrp();
-
 			        // Add your code here (execute an external command)
 
-					/*
-					your code
-					*/
+					// enter to job list
+					
 
 			default:
                 	// Add your code here
 
-					/*
-					your code
-					*/
+					if(background_flag) // if background processe
+					{
+						// add to father job list TODO
+					}
+					else
+					{
+						waitpid(pID, &state, WUNTRACED) // WUNTRACED for stopped processe
+					}
 	}
 }
 //**************************************************************************************
 // function name: ExeComp
-// Description: executes complicated command
+// Description: edit executes complicated command to executes like normal command
 // Parameters: command string
-// Returns: 0- if complicated -1- if not
+// Returns: same command string if not complicated or 'csh -f -c' addtion in the beggining of a complicated command
 //**************************************************************************************
-int ExeComp(char* lineSize)
+char* ExeComp(char* lineSize)
 {
-	char ExtCmd[MAX_LINE_SIZE+2];
-	char *args[MAX_ARG];
+	
     if ((strstr(lineSize, "|")) || (strstr(lineSize, "<")) || (strstr(lineSize, ">")) || (strstr(lineSize, "*")) || (strstr(lineSize, "?")) || (strstr(lineSize, ">>")) || (strstr(lineSize, "|&")))
     {
-		// Add your code here (execute a complicated command)
-    	char* cmd = "csh";
-    	char* args[MAX_ARG];
-    	args[0] = "-f";
-    	args[1] = "-c";
-    	char* args2 = args[2];
-    	strcpy(args2, lineSize);
-    	args2[strlen(lineSize)-1]='\0';
+		// Add your code here
+		char ExtCmd[MAX_LINE_SIZE+10]; // 10 for complicated command 'csh -f -c'];
+		strcpy (ExtCmd, "csh -f -c ");
+		strcat (ExtCmd, &lineSize);
 
-    	ExeExternal(args, cmd);
-    	return 0;
+    	return ExtCmd;
 	}
-	return -1;
+	return lineSize;
 }
 //**************************************************************************************
 // function name: BgCmd
@@ -153,23 +150,15 @@ int ExeComp(char* lineSize)
 // Parameters: command string, pointer to jobs
 // Returns: 0- BG command -1- if not
 //**************************************************************************************
-int BgCmd(char* lineSize, void* jobs)
+bool BgCmd(char* lineSize)
 {
-
-	char* Command;
-	char* delimiters = " \t\n";
-	char *args[MAX_ARG];
+	bool background_flag = FALSE;
 	if (lineSize[strlen(lineSize)-2] == '&')
 	{
-		lineSize[strlen(lineSize)-2] = '\0';
 		// Add your code here (execute a in the background)
-
-		/*
-		your code
-		*/
-
+		background_flag = TRUE;
 	}
-	return -1;
+	return background_flag;
 }
 
 

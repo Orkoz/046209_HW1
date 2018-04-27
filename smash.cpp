@@ -25,15 +25,15 @@ void stop_jobs(){
 
 char* L_Fg_Cmd;
 struct job* jobs = NULL; //This represents the list of jobs. Please change to a preferred type (e.g array of char*)
-char lineSize[MAX_LINE_SIZE];
+char lineSize[MAX_LINE_SIZE+10]; // 10 for complicated command 'csh -f -c'];];
 //**************************************************************************************
 // function name: main
 // Description: main function of smash. get command from user and calls command functions
 //**************************************************************************************
 int main(int argc, char *argv[])
 {
-    char cmdString[MAX_LINE_SIZE];
-
+    char cmdString[MAX_LINE_SIZE+10]; // 10 for complicated command 'csh -f -c'];];
+	bool background_flag;
 
 	//signal declaretions
 	//NOTE: the signal handlers and the function/s that sets the handler should be found in siganls.c
@@ -64,14 +64,19 @@ int main(int argc, char *argv[])
     	{
 	 	printf("smash > ");
 		fgets(lineSize, MAX_LINE_SIZE, stdin);
+				
+		lineSize = ExeComp(lineSize)); // edit a complicated Command for easy execute if needed
 		strcpy(cmdString, lineSize);
 		cmdString[strlen(lineSize)-1]='\0';
-					// perform a complicated Command
-		if(!ExeComp(lineSize)) continue;
-					// background command
-	 	if(!BgCmd(lineSize, jobs)) continue;
-					// built in commands
-		ExeCmd(jobs, lineSize, cmdString);
+						
+	 	background_flag = BgCmd(lineSize); // check if it's background command			
+		if (background_flag) // if it's background command change '&' to '\0'
+		{
+			lineSize[strlen(lineSize)-2] = '\0';
+		}
+		
+		// all commands
+		ExeCmd(jobs, lineSize, cmdString, background_flag);
 
 		/* initialize for next line read*/
 		lineSize[0]='\0';
