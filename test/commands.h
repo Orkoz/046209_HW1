@@ -9,8 +9,6 @@
 #include <string.h>
 #include <sys/types.h>
 #include <sys/wait.h>
-#include "job.h"
-
 #define MAX_LINE_SIZE 80
 #define MAX_ARG 20
 typedef enum { FALSE , TRUE } bool;
