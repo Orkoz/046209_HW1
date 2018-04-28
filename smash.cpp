@@ -18,6 +18,8 @@ main file. This file contains the main function of smash
 <<<<<<< HEAD:smash.cpp
 using namespace std;
 
+void stop_job();
+
 char* L_Fg_Cmd;
 list<job> jobs; //This represents the list of jobs. Please change to a preferred type (e.g array of char*)
 char lineSize[MAX_LINE_SIZE];
@@ -49,7 +51,6 @@ int main(int argc, char *argv[])
 	// Init globals
 
 
-
 	L_Fg_Cmd =(char*)malloc(sizeof(char)*(MAX_LINE_SIZE+1));
 	if (L_Fg_Cmd == NULL)
 			exit (-1);
@@ -73,6 +74,16 @@ int main(int argc, char *argv[])
 		cmdString[0]='\0';
 	}
     return 0;
+}
+
+void stop_job(){
+	job new_job(last_job);
+	new_job.suspended = true;
+	new_job.sus_time = time(NULL);
+	jobs.push_back(new_job);
+	L_Fg_Cmd.pid = 0;
+	GPID = -1;
+	printf("\n");
 }
 
 

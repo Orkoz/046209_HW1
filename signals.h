@@ -6,7 +6,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <jobs.h>
+#include <job.h>
 
 #endif
 
