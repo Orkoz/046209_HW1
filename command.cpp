@@ -1,18 +1,21 @@
 //		commands.cpp
 //********************************************
 #include "commands.h"
+
+char pwd[MAX_PATH_SIZE];
+char pwd_pre[MAX_PATH_SIZE];
+list<string> history;
+	
 //********************************************
 // function name: ExeCmd
 // Description: interperts and executes built-in commands
-// Parameters: pointer to jobs, command string
+// Parameters: pointer to jobs, command string, background command flag
 // Returns: 0 - success,1 - failure
 //**************************************************************************************
 int ExeCmd(void* jobs, char* lineSize, char* cmdString, bool background_flag)
 {
 	char* cmd;
 	char* args[MAX_ARG+3]; // 3 for complicated command 'csh -f -c'];
-	char pwd[MAX_PATH_SIZE];
-	char pwd_pre[MAX_PATH_SIZE];
 	char* delimiters = " \t\n";
 	int i = 0, num_arg = 0;
 	bool illegal_cmd = FALSE; // illegal command
@@ -27,11 +30,28 @@ int ExeCmd(void* jobs, char* lineSize, char* cmdString, bool background_flag)
 			num_arg++;
 
 	}
-/*************************************************/
-// Built in Commands PLEASE NOTE NOT ALL REQUIRED
-// ARE IN THIS CHAIN OF IF COMMANDS. PLEASE ADD
-// MORE IF STATEMENTS AS REQUIRED
-/*************************************************/
+	AddToHistory(lineSize)
+
+	/*************************************************/
+	else if (!strcmp(cmd, "pwd"))
+	{
+		if(num_arg != 0)
+		{
+			illegal_cmd = TRUE;
+		}
+		else if (getcwd(pwd, MAX_LINE_SIZE)==NULL)
+		{
+			cerr << endl; // print error messge TODO
+			return 1;
+		}
+		else
+		{
+			cout << pwd << endl;
+			return 0;
+		}
+	
+	}
+	/*************************************************/
 	if (!strcmp(cmd, "cd") )
 	{
 		if(num_arg != 1)
@@ -65,30 +85,59 @@ int ExeCmd(void* jobs, char* lineSize, char* cmdString, bool background_flag)
 			return 0;
 		}
 	}
-
 	/*************************************************/
-	else if (!strcmp(cmd, "pwd"))
+	else if (!strcmp(cmd, "history"))
 	{
 		if(num_arg != 0)
 		{
 			illegal_cmd = TRUE;
 		}
-		else if (getcwd(pwd, MAX_LINE_SIZE)==NULL)
+		else if(!history.empty)
 		{
-			cerr << endl; // print error messge TODO
-			return 1;
+			list<string>::iterator its;
+			for (its = history.begin(); its != history.end(); its++)
+			{
+				cout << *its << endl;
+			}
+			return 0;
 		}
 		else
 		{
-			cout << pwd << endl;
 			return 0;
 		}
-	
 	}
 	/*************************************************/
 	else if (!strcmp(cmd, "jobs"))
 	{
-
+		if(num_arg != 0)
+		{
+			illegal_cmd = TRUE;
+		}
+		else if(!jobs.empty)
+		{
+			int i;
+			for (i=0; i < jobs.size; i++)
+			{
+				cout << [i] << " " << jobs[i].PrintJob << endl; // TODO PrintJob func
+			}
+			return 0;
+		}
+		else
+		{
+			return 0;
+		}
+	}
+	/*************************************************/
+	else if (!strcmp(cmd, "kill"))
+	{
+		if(num_arg != 2)
+		{
+			illegal_cmd = TRUE;
+		}
+		else if()
+		{
+			
+		}
 	}
 	/*************************************************/
 	else if (!strcmp(cmd, "showpid"))
@@ -198,6 +247,20 @@ bool BgCmd(char* lineSize)
 	return background_flag;
 
 }
+//**************************************************************************************
+// function name: AddToHistory
+// Description: add commend to history list. if it's allredy full (50) delete the first one first
+// Parameters: command string
+// Returns: void
+//**************************************************************************************
+void AddToHistory(char* lineSize)
+	{
+		if(history.size == MAX_HISTORY_SIZE)
+		{
+			history.pop_front;
+		}
+		history.push_back(lineSize);	
+	}
 
 
 
