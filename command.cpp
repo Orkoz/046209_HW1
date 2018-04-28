@@ -18,7 +18,7 @@ int ExeCmd(void* jobs, char* lineSize, char* cmdString, bool background_flag)
 	char* args[MAX_ARG+3]; // 3 for complicated command 'csh -f -c'];
 	char* delimiters = " \t\n";
 	int i = 0, num_arg = 0;
-	bool illegal_cmd = FALSE; // illegal command
+	bool illegal_cmd = false; // illegal command
     	cmd = strtok(lineSize, delimiters);
 	if (cmd == NULL)
 		return 0;
@@ -37,7 +37,7 @@ int ExeCmd(void* jobs, char* lineSize, char* cmdString, bool background_flag)
 	{
 		if(num_arg != 0)
 		{
-			illegal_cmd = TRUE;
+			illegal_cmd = true;
 		}
 		else if (getcwd(pwd, MAX_LINE_SIZE)==NULL)
 		{
@@ -56,7 +56,7 @@ int ExeCmd(void* jobs, char* lineSize, char* cmdString, bool background_flag)
 	{
 		if(num_arg != 1)
 		{
-			illegal_cmd = TRUE;
+			illegal_cmd = true;
 		}
 		
 		else if ( !strcmp(args[1],"-") )
@@ -90,7 +90,7 @@ int ExeCmd(void* jobs, char* lineSize, char* cmdString, bool background_flag)
 	{
 		if(num_arg != 0)
 		{
-			illegal_cmd = TRUE;
+			illegal_cmd = true;
 		}
 		else if(!history.empty)
 		{
@@ -111,7 +111,7 @@ int ExeCmd(void* jobs, char* lineSize, char* cmdString, bool background_flag)
 	{
 		if(num_arg != 0)
 		{
-			illegal_cmd = TRUE;
+			illegal_cmd = true;
 		}
 		else if(!jobs.empty)
 		{
@@ -132,7 +132,7 @@ int ExeCmd(void* jobs, char* lineSize, char* cmdString, bool background_flag)
 	{
 		if(num_arg != 2)
 		{
-			illegal_cmd = TRUE;
+			illegal_cmd = true;
 		}
 		else if(!args[2])
 		{
@@ -159,7 +159,7 @@ int ExeCmd(void* jobs, char* lineSize, char* cmdString, bool background_flag)
 	{
 		if(num_arg != 0)
 		{
-			illegal_cmd = TRUE;
+			illegal_cmd = true;
 		}
 		else
 		{
@@ -173,7 +173,7 @@ int ExeCmd(void* jobs, char* lineSize, char* cmdString, bool background_flag)
 	{
 		if(num_arg > 1)
 		{
-			illegal_cmd = TRUE;
+			illegal_cmd = true;
 		}
 		else if ( jobs.empty )
 		{
@@ -188,9 +188,10 @@ int ExeCmd(void* jobs, char* lineSize, char* cmdString, bool background_flag)
 			if(L_Fg_Cmd.stopped)
 			{
 				L_Fg_Cmd.stopped = false;
-				rep_kill(L_Fg_Cmd.pid, sigACTION); // TODO rep_kill func and signal sigACTION
+				rep_kill(L_Fg_Cmd.pid, SIGCONT); // TODO rep_kill func and signal SIGCONT
 			}
 			waitpid(L_Fg_Cmd.pid, &state, WUNTRACED) // WUNTRACED for stopped processe
+			L_Fg_Cmd = NULL; // TODO if work
 			return 0;	
 		}
 		else // ( num_arg == 1) fg for job command number = args[1]
@@ -210,7 +211,7 @@ int ExeCmd(void* jobs, char* lineSize, char* cmdString, bool background_flag)
 				if(L_Fg_Cmd.stopped)
 				{
 					L_Fg_Cmd.stopped = false;
-					rep_kill(L_Fg_Cmd.pid, sigACTION); // TODO rep_kill func and signal sigACTION
+					rep_kill(L_Fg_Cmd.pid, SIGCONT); // TODO rep_kill func and signal SIGCONT
 				}
 				cout << L_Fg_Cmd.name << endl;
 				waitpid(L_Fg_Cmd.pid, &state, WUNTRACED) // WUNTRACED for stopped processe
@@ -223,7 +224,7 @@ int ExeCmd(void* jobs, char* lineSize, char* cmdString, bool background_flag)
 	{
 		if(num_arg > 1)
 		{
-			illegal_cmd = TRUE;
+			illegal_cmd = true;
 		}
 		else if ( jobs.empty )
 		{
@@ -280,7 +281,7 @@ int ExeCmd(void* jobs, char* lineSize, char* cmdString, bool background_flag)
 	{
 		if(num_arg > 1)
 		{
-			illegal_cmd = TRUE;
+			illegal_cmd = true;
 		}	
 		else if ( num_arg == 0) // regular quit
 		{
@@ -329,11 +330,11 @@ int ExeCmd(void* jobs, char* lineSize, char* cmdString, bool background_flag)
 	{
 		if(num_arg != 2)
 		{
-			illegal_cmd = TRUE;
+			illegal_cmd = true;
 		}	
 		else if ( )
 		{
-			if(!rename( args[1] , args[2] ))
+			if(rename( args[1] , args[2] ))
 			{
 				cerr << "smash error: > mv - is failed" << endl;
 				return 1;
@@ -350,7 +351,7 @@ int ExeCmd(void* jobs, char* lineSize, char* cmdString, bool background_flag)
 	 	return 0;
 	}
 	/*************************************************/
-	if (illegal_cmd == TRUE)
+	if (illegal_cmd == true)
 	{
 		cerr << "smash error: > " << lineSize << endl;
 		return 1;
@@ -418,15 +419,15 @@ char* ExeComp(char* lineSize)
 // function name: BgCmd
 // Description: check if the command are background command
 // Parameters: command string
-// Returns: background_flag: TRUE if it's background command or FALSE otherwize
+// Returns: background_flag: true if it's background command or false otherwize
 //**************************************************************************************
 bool BgCmd(char* lineSize)
 {
-	bool background_flag = FALSE;
+	bool background_flag = false;
 	if (lineSize[strlen(lineSize)-2] == '&')
 	{
 		// Add your code here (execute a in the background)
-		background_flag = TRUE;
+		background_flag = true;
 	}
 	return background_flag;
 
