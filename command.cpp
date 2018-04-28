@@ -64,7 +64,6 @@ int ExeCmd(void* jobs, char* lineSize, char* cmdString, bool background_flag)
 			pwd = args[1];
 			return 0;
 		}
-		
 	}
 
 	/*************************************************/
@@ -114,6 +113,7 @@ int ExeCmd(void* jobs, char* lineSize, char* cmdString, bool background_flag)
 	/*************************************************/
 	else // external command
 	{
+
  		ExeExternal(args, cmdString, background_flag);
 	 	return 0;
 	}
@@ -148,7 +148,6 @@ void ExeExternal(char *args[MAX_ARG+3], char* cmdString, void* jobs, bool backgr
 					cerr << endl; // how print ereor TODO
 					// sanding kill signal TODO
 					
-
 			default:
                 	// Add your code here
 
@@ -197,6 +196,7 @@ bool BgCmd(char* lineSize)
 		background_flag = TRUE;
 	}
 	return background_flag;
+
 }
 
 

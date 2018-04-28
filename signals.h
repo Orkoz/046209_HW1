@@ -6,9 +6,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <signal.h>
-
-
+#include <job.h>
 
 #endif
+
+void catch_ctrl_z(int sig_num);
+
 
