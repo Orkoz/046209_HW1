@@ -19,15 +19,21 @@ using namespace std;
 class job {
 public:
 
-	job(string name, int pid, int time);
+	job(string name, int pid, int time,  bool stopped);
 	string getName();
 	int getPID();
 	int getTime();
+	bool job::isStopped();
+	void stopJob();
+	void continueJob();
+
+
 
 private:
 	string name_;
     int pid_;
     int time_;
+    bool stopped_;
 };
 
 
