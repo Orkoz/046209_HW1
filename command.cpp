@@ -7,13 +7,12 @@
 // Parameters: pointer to jobs, command string
 // Returns: 0 - success,1 - failure
 //**************************************************************************************
-
-int ExeCmd(void* jobs, char* lineSize, char* cmdString)
+int ExeCmd(void* jobs, char* lineSize, char* cmdString, bool background_flag)
 {
-
-	char* cmd; 
-	char* args[MAX_ARG+3]; // 3 for complicated command 'csh -f -c'
-	char pwd[MAX_LINE_SIZE];
+	char* cmd;
+	char* args[MAX_ARG+3]; // 3 for complicated command 'csh -f -c'];
+	char pwd[MAX_PATH_SIZE];
+	char pwd_pre[MAX_PATH_SIZE];
 	char* delimiters = " \t\n";
 	int i = 0, num_arg = 0;
 	bool illegal_cmd = FALSE; // illegal command
@@ -21,7 +20,7 @@ int ExeCmd(void* jobs, char* lineSize, char* cmdString)
 	if (cmd == NULL)
 		return 0;
    	args[0] = cmd;
-	for (i=1; i<MAX_ARG+3; i++) // 3 for complicated command 'csh -f -c'
+	for (i=1; i<MAX_ARG+3; i++) // 3 for complicated command 'csh -f -c'];
 	{
 		args[i] = strtok(NULL, delimiters);
 		if (args[i] != NULL)
@@ -35,23 +34,58 @@ int ExeCmd(void* jobs, char* lineSize, char* cmdString)
 /*************************************************/
 	if (!strcmp(cmd, "cd") )
 	{
-
+		if(num_arg != 1)
+		{
+			illegal_cmd = TRUE;
+		}
+		
+		else if ( !strcmp(args[1],"-") )
+		{
+			if (!pwd_pre || chdir(pwd_pre)) // if pwd_pre==NULL or path not found
+			{
+				cerr << "smash error: > " << args[1] << " - path not found" << endl;
+				return 1;
+			}
+			char temp[MAX_PATH_SIZE];
+			temp = pwd;
+			pwd = pwd_pre;
+			pwd_pre = temp;
+			cout << pwd << endl;
+			return 0;
+		}
+		else 
+		{	
+			if (chdir(args[1]) // path not coorect 
+			{
+				cerr << "smash error: > " << args[1] << " - path not found " << endl;
+				return 1;
+			}
+			pwd_pre = pwd;
+			pwd = args[1];
+			return 0;
+		}
 	}
 
 	/*************************************************/
 	else if (!strcmp(cmd, "pwd"))
-	{	
-			getcwd(pwd, MAX_LINE_SIZE); //TODO check and: illegal_cmd = TRUE
-			cout << pwd << endl;
-	}
-
-	/*************************************************/
-	else if (!strcmp(cmd, "mkdir"))
 	{
-
+		if(num_arg != 0)
+		{
+			illegal_cmd = TRUE;
+		}
+		else if (getcwd(pwd, MAX_LINE_SIZE)==NULL)
+		{
+			cerr << endl; // print error messge TODO
+			return 1;
+		}
+		else
+		{
+			cout << pwd << endl;
+			return 0;
+		}
+	
 	}
 	/*************************************************/
-
 	else if (!strcmp(cmd, "jobs"))
 	{
 
@@ -79,100 +113,90 @@ int ExeCmd(void* jobs, char* lineSize, char* cmdString)
 	/*************************************************/
 	else // external command
 	{
- 		ExeExternal(args, cmdString);
+
+ 		ExeExternal(args, cmdString, background_flag);
 	 	return 0;
 	}
 	if (illegal_cmd == TRUE)
 	{
-		printf("smash error: > \"%s\"\n", cmdString);
+		cerr << "smash error: > " << lineSize << endl;
 		return 1;
 	}
     return 0;
 }
+
 //**************************************************************************************
 // function name: ExeExternal
 // Description: executes external command
-// Parameters: external command arguments, external command string
+// Parameters: external command arguments, external command string, jobs list, bool background_flag
 // Returns: void
 //**************************************************************************************
-void ExeExternal(char *args[MAX_ARG+3], char* cmdString) // 3 for complicated command 'csh -f -c'
+void ExeExternal(char *args[MAX_ARG+3], char* cmdString, void* jobs, bool background_flag)// 3 for complicated command 'csh -f -c'];
 {
 	int pID;
     	switch(pID = fork())
 	{
     		case -1:
 					// Add your code here (error)
-
-					/*
-					your code
-					*/
+					cerr << endl; // print ereor TODO
+					
         	case 0 :
                 	// Child Process
                		setpgrp();
-
 			        // Add your code here (execute an external command)
-
-					/*
-					your code
-					*/
-
+					execvp(args[0],args) 
+					cerr << endl; // how print ereor TODO
+					// sanding kill signal TODO
+					
 			default:
                 	// Add your code here
 
-					/*
-					your code
-					*/
+					if(background_flag) // if command is in background, insert the command to jobs
+					{
+						// add to father job list TODO
+					}
+					else
+					{
+						waitpid(pID, &state, WUNTRACED) // WUNTRACED for stopped processe
+					}
 	}
 }
 //**************************************************************************************
 // function name: ExeComp
-// Description: executes complicated command
+// Description: edit executes complicated command to executes like normal command
 // Parameters: command string
-// Returns: 0- if complicated -1- if not
+// Returns: same command string if not complicated or 'csh -f -c' addtion in the beggining of a complicated command
 //**************************************************************************************
 char* ExeComp(char* lineSize)
 {
-	char ExtCmd[MAX_LINE_SIZE+10]; // 10 for complicated command 'csh -f -c ' 10 char
-	char *args[MAX_ARG+3]; // 3 for complicated command 'csh -f -c'
+	
     if ((strstr(lineSize, "|")) || (strstr(lineSize, "<")) || (strstr(lineSize, ">")) || (strstr(lineSize, "*")) || (strstr(lineSize, "?")) || (strstr(lineSize, ">>")) || (strstr(lineSize, "|&")))
     {
-		// Add your code here (execute a complicated command)
-    	
-		char* cmd = "csh";
-    	args[0] = "-f";
-    	args[1] = "-c";
-    	char* args2 = args[2];
-    	strcpy(args2, lineSize);
-    	args2[strlen(lineSize)-1]='\0';
+		// Add your code here
+		char ExtCmd[MAX_LINE_SIZE+10]; // 10 for complicated command 'csh -f -c'];
+		strcpy (ExtCmd, "csh -f -c "); // TODO check return?
+		strcat (ExtCmd, &lineSize); // TODO check return?
 
-    	ExeExternal(args, cmd);
-    	return 0;
+    	return ExtCmd;
 	}
-	return -1;
+	return lineSize;
 }
 //**************************************************************************************
 // function name: BgCmd
-// Description: if command is in background, insert the command to jobs
-// Parameters: command string, pointer to jobs
-// Returns: 0- BG command -1- if not
+// Description: check if the command are background command
+// Parameters: command string
+// Returns: background_flag: TRUE if it's background command or FALSE otherwize
 //**************************************************************************************
-int BgCmd(char* lineSize, void* jobs)
+bool BgCmd(char* lineSize)
 {
-
-	char* Command;
-	char* delimiters = " \t\n";
-	char *args[MAX_ARG];
+	bool background_flag = FALSE;
 	if (lineSize[strlen(lineSize)-2] == '&')
 	{
-		lineSize[strlen(lineSize)-2] = '\0';
 		// Add your code here (execute a in the background)
-
-		/*
-		your code
-		*/
-
+		background_flag = TRUE;
 	}
-	return -1;
+	return background_flag;
+
 }
 
 
