@@ -15,13 +15,10 @@ main file. This file contains the main function of smash
 #define MAX_LINE_SIZE 80
 #define MAXARGS 20
 
-<<<<<<< HEAD:smash.cpp
 using namespace std;
 
 void stop_job();
 
-char* L_Fg_Cmd;
-list<job> jobs; //This represents the list of jobs. Please change to a preferred type (e.g array of char*)
 char lineSize[MAX_LINE_SIZE];
 //**************************************************************************************
 // function name: main
@@ -50,13 +47,7 @@ int main(int argc, char *argv[])
 	/************************************/
 	// Init globals
 
-
-	L_Fg_Cmd =(char*)malloc(sizeof(char)*(MAX_LINE_SIZE+1));
-	if (L_Fg_Cmd == NULL)
-			exit (-1);
-	L_Fg_Cmd[0] = '\0';
-
-    	while (1)
+    while (1)
     	{
 	 	printf("smash > ");
 		fgets(lineSize, MAX_LINE_SIZE, stdin);
@@ -65,9 +56,9 @@ int main(int argc, char *argv[])
 					// perform a complicated Command
 		lineSize = ExeComp(lineSize)); 
 					// background command	
-	 	if(!BgCmd(lineSize, jobs)) continue; 
+	 	if(!BgCmd(lineSize)) continue;
 					// built in commands
-		ExeCmd(jobs, lineSize, cmdString);
+		ExeCmd(lineSize, cmdString);
 
 		/* initialize for next line read*/
 		lineSize[0]='\0';
@@ -76,15 +67,6 @@ int main(int argc, char *argv[])
     return 0;
 }
 
-void stop_job(){
-	job new_job(last_job);
-	new_job.suspended = true;
-	new_job.sus_time = time(NULL);
-	jobs.push_back(new_job);
-	L_Fg_Cmd.pid = 0;
-	GPID = -1;
-	printf("\n");
-}
 
 
 
