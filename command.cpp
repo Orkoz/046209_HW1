@@ -8,11 +8,11 @@ static list<string> history;
 	
 //********************************************
 // function name: ExeCmd
-// Description: interperts and executes built-in commands
+// Description: interprets and executes built-in commands
 // Parameters: pointer to jobs, command string, background command flag
 // Returns: 0 - success,1 - failure
 //**************************************************************************************
-int ExeCmd(void* jobs, char* lineSize, char* cmdString, bool background_flag)
+int ExeCmd(list<job> &jobs, char* lineSize, char* cmdString, bool background_flag)
 {
 	char* cmd;
 	char* args[MAX_ARG+3]; // 3 for complicated command 'csh -f -c'];
@@ -30,10 +30,10 @@ int ExeCmd(void* jobs, char* lineSize, char* cmdString, bool background_flag)
 			num_arg++;
 
 	}
-	AddToHistory(lineSize)
+	AddToHistory(lineSize);
 
 	/*************************************************/
-	else if (!strcmp(cmd, "pwd"))
+	if (!strcmp(cmd, "pwd"))
 	{
 		if(num_arg != 0)
 		{
@@ -52,7 +52,7 @@ int ExeCmd(void* jobs, char* lineSize, char* cmdString, bool background_flag)
 	
 	}
 	/*************************************************/
-	if (!strcmp(cmd, "cd") )
+	else if (!strcmp(cmd, "cd") )
 	{
 		if(num_arg != 1)
 		{
@@ -75,7 +75,7 @@ int ExeCmd(void* jobs, char* lineSize, char* cmdString, bool background_flag)
 		}
 		else 
 		{	
-			if (chdir(args[1]) // path not coorect 
+			if(chdir(args[1])) // path not correct
 			{
 				cerr << "smash error: > " << args[1] << " - path not found " << endl;
 				return 1;
@@ -115,6 +115,8 @@ int ExeCmd(void* jobs, char* lineSize, char* cmdString, bool background_flag)
 		}
 		else if(!jobs.empty)
 		{
+			list<string>::iterator its;
+			for (its = history.begin(); its != history.end(); its++)
 			int i;
 			for (i=0; i < jobs.size; i++)
 			{
