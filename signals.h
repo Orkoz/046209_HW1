@@ -7,6 +7,10 @@
 #include <stdlib.h>
 #include <string.h>
 #include <job.h>
+#include "signals.h"
+#include "commands.h"
+#include <list>
+using std::list;
 
 #endif
 
