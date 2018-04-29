@@ -115,12 +115,12 @@ int ExeCmd(list<job> &jobs, char* lineSize, char* cmdString, bool background_fla
 		}
 		else if(!jobs.empty)
 		{
-			list<string>::iterator its;
-			for (its = history.begin(); its != history.end(); its++)
-			int i;
-			for (i=0; i < jobs.size; i++)
+			list<job>::iterator its;
+			int i = 0;
+			for (its = jobs.begin(); its != jobs.end(); its++)
 			{
-				cout << "[" << i << "] " << jobs[i].printJob << endl; // TODO printJob func
+				cout << "[" << i << "] " << *its.printJob << endl; // TODO printJob func
+				i++;
 			}
 			return 0;
 		}
@@ -184,15 +184,15 @@ int ExeCmd(list<job> &jobs, char* lineSize, char* cmdString, bool background_fla
 		}
 		else if ( num_arg == 0) // no command number - fg for last background cmd
 		{
-			L_Fg_Cmd = jobs.back;
+			job L_Fg_Cmd = jobs.back();
 			jobs.pop_back;
-			cout << L_Fg_Cmd.name << endl;
-			if(L_Fg_Cmd.stopped)
+			cout << L_Fg_Cmd.name_ << endl;
+			if(L_Fg_Cmd.stopped_)
 			{
-				L_Fg_Cmd.stopped = false;
-				rep_kill(L_Fg_Cmd.pid, SIGCONT); // TODO rep_kill func and signal SIGCONT
+				L_Fg_Cmd.stopped_ = false;
+				rep_kill(L_Fg_Cmd.pid_, SIGCONT); // TODO rep_kill func and signal SIGCONT
 			}
-			waitpid(L_Fg_Cmd.pid, &state, WUNTRACED) // WUNTRACED for stopped processe
+			waitpid(L_Fg_Cmd.pid_, NULL, WUNTRACED); // WUNTRACED for stopped process
 			L_Fg_Cmd = NULL; // TODO if work
 			return 0;	
 		}
@@ -208,15 +208,15 @@ int ExeCmd(list<job> &jobs, char* lineSize, char* cmdString, bool background_fla
 			{
 				list<job>::iterator its = jobs.begin();
 				std::advance(its, cmd_num-1);
-				L_Fg_Cmd = *its;
+				job L_Fg_Cmd = *its;
 				jobs.erase(its);
-				if(L_Fg_Cmd.stopped)
+				if(L_Fg_Cmd.stopped_)
 				{
-					L_Fg_Cmd.stopped = false;
-					rep_kill(L_Fg_Cmd.pid, SIGCONT); // TODO rep_kill func and signal SIGCONT
+					L_Fg_Cmd.stopped_ = false;
+					rep_kill(L_Fg_Cmd.pid_, SIGCONT); // TODO rep_kill func and signal SIGCONT
 				}
-				cout << L_Fg_Cmd.name << endl;
-				waitpid(L_Fg_Cmd.pid, &state, WUNTRACED) // WUNTRACED for stopped processe
+				cout << L_Fg_Cmd.name_ << endl;
+				waitpid(L_Fg_Cmd.pid_, NULL, WUNTRACED); // WUNTRACED for stopped process
 				return 0;	
 			}
 		}
