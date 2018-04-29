@@ -2,9 +2,11 @@
 //********************************************
 #include "commands.h"
 
-char pwd[MAX_PATH_SIZE];
-char pwd_pre[MAX_PATH_SIZE];
-list<string> history;
+static list<job> jobs; //This represents the list of jobs. Please change to a preferred type (e.g array of string)
+static char pwd[MAX_PATH_SIZE];
+static char pwd_pre[MAX_PATH_SIZE];
+static list<string> history;
+static job fg_job;
 	
 //********************************************
 // function name: ExeCmd
@@ -12,13 +14,13 @@ list<string> history;
 // Parameters: pointer to jobs, command string, background command flag
 // Returns: 0 - success,1 - failure
 //**************************************************************************************
-int ExeCmd(void* jobs, char* lineSize, char* cmdString, bool background_flag)
+int ExeCmd(string lineSize, string cmdString, bool background_flag)
 {
-	char* cmd;
-	char* args[MAX_ARG+3]; // 3 for complicated command 'csh -f -c'];
-	char* delimiters = " \t\n";
+	string cmd;
+	string args[MAX_ARG+3]; // 3 for complicated command 'csh -f -c'];
+	string delimiters = " \t\n";
 	int i = 0, num_arg = 0;
-	bool illegal_cmd = FALSE; // illegal command
+	bool illegal_cmd = false; // illegal command
     	cmd = strtok(lineSize, delimiters);
 	if (cmd == NULL)
 		return 0;
@@ -30,14 +32,14 @@ int ExeCmd(void* jobs, char* lineSize, char* cmdString, bool background_flag)
 			num_arg++;
 
 	}
-	AddToHistory(lineSize)
+	AddToHistory(lineSize);
 
 	/*************************************************/
-	else if (!strcmp(cmd, "pwd"))
+	if (!strcmp(cmd, "pwd"))
 	{
 		if(num_arg != 0)
 		{
-			illegal_cmd = TRUE;
+			illegal_cmd = true;
 		}
 		else if (getcwd(pwd, MAX_LINE_SIZE)==NULL)
 		{
@@ -52,11 +54,11 @@ int ExeCmd(void* jobs, char* lineSize, char* cmdString, bool background_flag)
 	
 	}
 	/*************************************************/
-	if (!strcmp(cmd, "cd") )
+	else if (!strcmp(cmd, "cd") )
 	{
 		if(num_arg != 1)
 		{
-			illegal_cmd = TRUE;
+			illegal_cmd = true;
 		}
 		
 		else if ( !strcmp(args[1],"-") )
@@ -75,7 +77,7 @@ int ExeCmd(void* jobs, char* lineSize, char* cmdString, bool background_flag)
 		}
 		else 
 		{	
-			if (chdir(args[1]) // path not coorect 
+			if (chdir(args[1])) // path not coorect
 			{
 				cerr << "smash error: > " << args[1] << " - path not found " << endl;
 				return 1;
@@ -90,7 +92,7 @@ int ExeCmd(void* jobs, char* lineSize, char* cmdString, bool background_flag)
 	{
 		if(num_arg != 0)
 		{
-			illegal_cmd = TRUE;
+			illegal_cmd = true;
 		}
 		else if(!history.empty)
 		{
@@ -111,14 +113,14 @@ int ExeCmd(void* jobs, char* lineSize, char* cmdString, bool background_flag)
 	{
 		if(num_arg != 0)
 		{
-			illegal_cmd = TRUE;
+			illegal_cmd = true;
 		}
 		else if(!jobs.empty)
 		{
 			int i;
 			for (i=0; i < jobs.size; i++)
 			{
-				cout << [i] << " " << jobs[i].PrintJob << endl; // TODO PrintJob func
+				cout << '[' << i << ']' << " " << jobs[i].printJob << endl; // TODO PrintJob func
 			}
 			return 0;
 		}
@@ -132,7 +134,7 @@ int ExeCmd(void* jobs, char* lineSize, char* cmdString, bool background_flag)
 	{
 		if(num_arg != 2)
 		{
-			illegal_cmd = TRUE;
+			illegal_cmd = true;
 		}
 		else if()
 		{
@@ -166,7 +168,7 @@ int ExeCmd(void* jobs, char* lineSize, char* cmdString, bool background_flag)
  		ExeExternal(args, cmdString, background_flag);
 	 	return 0;
 	}
-	if (illegal_cmd == TRUE)
+	if (illegal_cmd == true)
 	{
 		cerr << "smash error: > " << lineSize << endl;
 		return 1;
@@ -180,7 +182,7 @@ int ExeCmd(void* jobs, char* lineSize, char* cmdString, bool background_flag)
 // Parameters: external command arguments, external command string, jobs list, bool background_flag
 // Returns: void
 //**************************************************************************************
-void ExeExternal(char *args[MAX_ARG+3], char* cmdString, void* jobs, bool background_flag)// 3 for complicated command 'csh -f -c'];
+void ExeExternal(string args[MAX_ARG+3], string cmdString, bool background_flag)// 3 for complicated command 'csh -f -c'];
 {
 	int pID;
     	switch(pID = fork())
@@ -193,12 +195,13 @@ void ExeExternal(char *args[MAX_ARG+3], char* cmdString, void* jobs, bool backgr
                 	// Child Process
                		setpgrp();
 			        // Add your code here (execute an external command)
-					execvp(args[0],args) 
+					execvp(args[0],args);
 					cerr << endl; // how print ereor TODO
 					// sanding kill signal TODO
 					
 			default:
                 	// Add your code here
+
 
 					if(background_flag) // if command is in background, insert the command to jobs
 					{
@@ -206,6 +209,7 @@ void ExeExternal(char *args[MAX_ARG+3], char* cmdString, void* jobs, bool backgr
 					}
 					else
 					{
+						fg_job = new job(args[0], pID, false);
 						waitpid(pID, &state, WUNTRACED) // WUNTRACED for stopped processe
 					}
 	}
@@ -216,7 +220,7 @@ void ExeExternal(char *args[MAX_ARG+3], char* cmdString, void* jobs, bool backgr
 // Parameters: command string
 // Returns: same command string if not complicated or 'csh -f -c' addtion in the beggining of a complicated command
 //**************************************************************************************
-char* ExeComp(char* lineSize)
+string ExeComp(string lineSize)
 {
 	
     if ((strstr(lineSize, "|")) || (strstr(lineSize, "<")) || (strstr(lineSize, ">")) || (strstr(lineSize, "*")) || (strstr(lineSize, "?")) || (strstr(lineSize, ">>")) || (strstr(lineSize, "|&")))
@@ -224,7 +228,7 @@ char* ExeComp(char* lineSize)
 		// Add your code here
 		char ExtCmd[MAX_LINE_SIZE+10]; // 10 for complicated command 'csh -f -c'];
 		strcpy (ExtCmd, "csh -f -c "); // TODO check return?
-		strcat (ExtCmd, &lineSize); // TODO check return?
+		strct (ExtCmd, &lineSize); // TODO check return?
 
     	return ExtCmd;
 	}
@@ -234,15 +238,15 @@ char* ExeComp(char* lineSize)
 // function name: BgCmd
 // Description: check if the command are background command
 // Parameters: command string
-// Returns: background_flag: TRUE if it's background command or FALSE otherwize
+// Returns: background_flag: true if it's background command or false otherwize
 //**************************************************************************************
-bool BgCmd(char* lineSize)
+bool BgCmd(string lineSize)
 {
-	bool background_flag = FALSE;
+	bool background_flag = false;
 	if (lineSize[strlen(lineSize)-2] == '&')
 	{
 		// Add your code here (execute a in the background)
-		background_flag = TRUE;
+		background_flag = true;
 	}
 	return background_flag;
 
@@ -253,7 +257,7 @@ bool BgCmd(char* lineSize)
 // Parameters: command string
 // Returns: void
 //**************************************************************************************
-void AddToHistory(char* lineSize)
+void AddToHistory(string lineSize)
 	{
 		if(history.size == MAX_HISTORY_SIZE)
 		{
@@ -261,6 +265,16 @@ void AddToHistory(char* lineSize)
 		}
 		history.push_back(lineSize);	
 	}
+
+void stop_job(){
+	job new_job(fg_job);
+	new_job.suspended = true;
+	new_job.sus_time = time(NULL);
+	jobs.push_back(new_job);
+	L_Fg_Cmd.pid = 0;
+	GPID = -1;
+	printf("\n");
+}
 
 
 
