@@ -9,7 +9,6 @@ static char pwd_pre[MAX_PATH_SIZE];
 static list<string> history;
 static job fg_job;
 
-	
 //********************************************
 // function name: ExeCmd
 // Description: interprets and executes built-in commands
@@ -17,11 +16,11 @@ static job fg_job;
 // Returns: 0 - success,1 - failure
 //**************************************************************************************
 
-int ExeCmd(string lineSize, string cmdString, bool background_flag)
+int ExeCmd(char* lineSize, char* cmdString, bool background_flag)
 {
-	string cmd;
-	string args[MAX_ARG+3]; // 3 for complicated command 'csh -f -c'];
-	string delimiters = " \t\n";
+	char* cmd;
+	char* args[MAX_ARG+3]; // 3 for complicated command 'csh -f -c'];
+	const char* delimiters = " \t\n";
 	int i = 0, num_arg = 0;
 	bool illegal_cmd = false; // illegal command
     	cmd = strtok(lineSize, delimiters);
@@ -46,7 +45,7 @@ int ExeCmd(string lineSize, string cmdString, bool background_flag)
 		}
 		else if (getcwd(pwd, MAX_LINE_SIZE)==NULL)
 		{
-			cerr << endl; // print error messge TODO
+			cerr << endl; // print error message TODO
 			return 1;
 		}
 		else
@@ -124,7 +123,8 @@ int ExeCmd(string lineSize, string cmdString, bool background_flag)
 			int i = 0;
 			for (its = jobs.begin(); its != jobs.end(); its++)
 			{
-				cout << "[" << i << "] " << *its.printJob << endl; // TODO printJob func
+				cout << "[" << i << "] " << *its->printJob();
+						cout << endl; // TODO printJob func
 				i++;
 			}
 			return 0;
@@ -241,20 +241,19 @@ int ExeCmd(string lineSize, string cmdString, bool background_flag)
 		else if ( num_arg == 0) // no command number - bg for last background cmd
 		{
 			list<job>::iterator its;
-			for (its = jobs.end(); its != jobs.begin(); its--)
-			}
-				if(*its.stopped)
+			for(its = jobs.end(); its != jobs.begin(); its--)
+			{
+				if(*its->isStopped())
 				{
-					job L_Cmd_stopped = *its;
+					cout << *its->getName() << endl;
+					*its->isStopped() = false;
+					rep_kill(*its->getPID, sigACTION); // TODO rep_kill func and signal sigACTION
+					return 0;
 					break;
 				}
 				cerr << "smash error: > bg - all jobs list is running" << endl;
 				return 1;
 			}
-			cout << L_Cmd_stopped.name << endl;
-			L_Cmd_stopped.stopped = false;
-			rep_kill(L_Cmd_stopped.pid, sigACTION); // TODO rep_kill func and signal sigACTION
-			return 0;
 		}	
 		else // ( num_arg == 1) bg for job command number = args[1]
 		{
@@ -268,16 +267,16 @@ int ExeCmd(string lineSize, string cmdString, bool background_flag)
 			{
 				list<job>::iterator its = jobs.begin();
 				std::advance(its, cmd_num-1);
-				if(*its.stopped)
+				if(*its->isStopped())
 				{
-					cout << *its.name << endl;
-					*its.stopped = false;
-					rep_kill(*its.pid, sigACTION); // TODO rep_kill func and signal sigACTION
+					cout << *its->getName() << endl;
+					*its->isStopped() = false;
+					rep_kill(*its->getPID(), sigACTION); // TODO rep_kill func and signal sigACTION
 					return 0;	
 				}
 				else
 				{
-					cerr << "smash error: > bg - job is allredy running" << endl;
+					cerr << "smash error: > bg - job is already running" << endl;
 					return 1;				
 				}
 			}	
