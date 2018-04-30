@@ -400,7 +400,7 @@ void ExeExternal(char* args[MAX_ARG+3], char* cmdString, bool background_flag)//
 // Parameters: command string
 // Returns: same command string if not complicated or 'csh -f -c' addtion in the beggining of a complicated command
 //**************************************************************************************
-string ExeComp(char* lineSize)
+char* ExeComp(char* lineSize)
 {
 	
     if ((strstr(lineSize, "|")) || (strstr(lineSize, "<")) || (strstr(lineSize, ">")) || (strstr(lineSize, "*")) || (strstr(lineSize, "?")) || (strstr(lineSize, ">>")) || (strstr(lineSize, "|&")))
