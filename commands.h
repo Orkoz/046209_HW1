@@ -23,7 +23,7 @@ using namespace std;
 #define MAX_HISTORY_SIZE 50
 
 int ExeCmd(void* jobs, char* lineSize, char* cmdString);
-void ExeExternal(char *args[MAX_ARG], char* cmdString);
+void ExeExternal(char* args[MAX_ARG+3], char* cmdString, bool background_flag);
 char* ExeComp(char* lineSize);
 int BgCmd(char* lineSize, void* jobs);
 void AddToHistory(char* lineSize);

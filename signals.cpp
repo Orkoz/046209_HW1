@@ -11,18 +11,37 @@
 // Returns: void
 //**************************************************************************************
 void catch_ctrl_z(int sig_id){
-	stop_job(); // forwords the comma
+	stop_job(); // forwards the command handle to “commands” how manage the jobs
 }
 
+
+//**************************************************************************************
+// function name: catch_ctrl_z
+// Description: Ctrl-Z signal handler
+// Parameters: None
+// Returns: void
+//**************************************************************************************
 void catch_ctrl_c(int sig_id){
-	kill_job();
+	kill_job(); // forwards the command handle to “commands” how manage the jobs
 }
 
+//**************************************************************************************
+// function name: send_signal
+// Description: end the signal “sig_id” to process PID and print a matching massage to the user.
+// Parameters: pid: the PID of the process; sig_id: the signal the send.
+// Returns: (int) 0 - success, 1 - failure.
+//**************************************************************************************
 int send_signal(pid_t pid, int sig_id){
-	cout << "signal " << get_sig_name(sig_id) << " was sent to pid " << pid << endl;
+	cout << "signal " << get_sig_name(sig_id) << " was sent to pid " << pid << endl; // print a massage even if the signal failed
 	return kill(pid, sig_id);
 }
 
+//**************************************************************************************
+// function name: get the signal name (string) by its id.
+// Description: get the signal name (string) by its id.
+// Parameters: sig_id: the signal id.
+// Returns: (string) signal name.
+//**************************************************************************************
 string get_sig_name(int sig_id)
 {
 

@@ -397,8 +397,6 @@ void ExeExternal(char* args[MAX_ARG+3], char* cmdString, bool background_flag)//
 					if(background_flag) // if command is in background, insert the command to jobs
 					{
 						job new_job = job(args[0], pID, false);
-						new_job.stopped_ = true;
-						new_job.time_ = time(NULL);
 						jobs.push_back(new_job);
 					}
 					else
