@@ -40,7 +40,7 @@ int ExeCmd(char* lineSize, char* cmdString, bool background_flag)
 
 	}
 	AddToHistory(lineSize);
-//	RemoveFinishJob();
+	RemoveFinishJob();
 
 	/*************************************************/
 	if (!strcmp(cmd, "pwd"))
@@ -157,10 +157,29 @@ int ExeCmd(char* lineSize, char* cmdString, bool background_flag)
 		}
 		else
 		{
-			//strtok(args[1], "-");
-			//args[1] = strtok(NULL, "-");
-			if (args[1])
-			if(args[1]==NULL || send_signal(atoi(args[2]), atoi(args[1])))
+			unsigned int args_2 = atoi(args[2]);
+			if (args_2 > jobs.size())
+			{
+				cerr << "smash error: > kill job – job does not exist" << endl;
+				return 1;
+			}
+			job tempJob;
+			int i = 0;
+	        for (list<job>::iterator its = jobs.begin(); its != jobs.end(); its++)
+	        {
+	            if(i == atoi(args[2]))
+	            {
+	                tempJob = *its;
+	            }
+	            i++;
+	        }
+			args[1] = strtok(args[1], "-");
+			if(atoi(args[1]) > 31 || atoi(args[1])<1)
+			{
+				cerr << "smash error: > kill job – signal does not exist" << endl;
+				return 1;
+			}
+			if(args[1]==NULL || send_signal(tempJob.getPID(), atoi(args[1])))
 			{
 				cerr << "smash error: > kill job – cannot send signal" << endl;
 				return 1;				
@@ -209,11 +228,20 @@ int ExeCmd(char* lineSize, char* cmdString, bool background_flag)
 			}
 			else
 			{
+				int i = 0;
 				list<job>::iterator its = jobs.begin();
-				std::advance(its, cmd_num-1);
-				L_Fg_Cmd = *its;
-				jobs.erase(its);
+				for (list<job>::iterator its = jobs.begin(); its != jobs.end(); its++)
+				{
+					if(i == atoi(args[1]))
+					{
+						L_Fg_Cmd = *its;
+						jobs.erase(its);
+						break;
+					}
+					i++;
+				}
 			}
+
 		}
 		if(!illegal_cmd)
 		{
@@ -226,7 +254,6 @@ int ExeCmd(char* lineSize, char* cmdString, bool background_flag)
 					return 1;
 				}
 				L_Fg_Cmd.continueJob();
-				send_signal(L_Fg_Cmd.getPID() , SIGCONT);
 			}
 			fgExcites = true;
 			waitpid(L_Fg_Cmd.getPID(), NULL, WUNTRACED); // WUNTRACED for stopped process
@@ -510,15 +537,18 @@ void kill_job(){
 //**************************************************************************************
 void RemoveFinishJob()
 {
+	int status;
 	list<job>::iterator its;
 	for (its = jobs.begin(); its != jobs.end(); its++)
 	{
-		if (waitpid(its->getPID(), NULL, WNOHANG) != 0)
-			jobs.erase(its);
-		if (jobs.size() == 0 || its == jobs.end())
-			break;
+		if (waitpid(its->getPID(), &status, WNOHANG) != 0)
+		{
+			if(WIFEXITED(status) ||  WIFSIGNALED(status))
+				its = jobs.erase(its);
+		}
 	}
 }
+
 
 
 
