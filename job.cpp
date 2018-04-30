@@ -12,7 +12,7 @@
 // Parameters: None
 // Returns: job object
 //**************************************************************************************
-job::job():name_(NULL),pid_(NULL),stopped_(false){time(&time_);}
+job::job():name_(""),pid_(0),stopped_(false){time(&time_);}
 
 //**************************************************************************************
 // function name: job
