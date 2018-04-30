@@ -30,10 +30,10 @@ public:
 	string getName();
 	int getPID();
 	int getTime();
-	bool job::isStopped();
+	bool isStopped();
 	void stopJob();
 	void continueJob();
-	void printJob();
+	string printJob();
 
 
 
