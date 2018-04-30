@@ -19,5 +19,8 @@ bool job::isStopped(){return stopped_;}
 void job::stopJob(){stopped_ = true;}
 void job::continueJob(){stopped_ = false;}
 string job::printJob(){
-	cout << name_ << " " << pid_ << " " << time << " sec" << endl;
+	if (stopped_ == true)
+		cout << name_ << " " << pid_ << " " << time << " sec (Stopped)" << endl;
+	else
+		cout << name_ << " " << pid_ << " " << time << " sec" << endl;
 }

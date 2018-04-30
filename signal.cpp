@@ -13,9 +13,13 @@ void catch_ctrl_z(int sig_id){
 	stop_job();
 }
 
+void catch_ctrl_z(int sig_id){
+	kill_job();
+}
+
 string send_signal(pid_t pid, int sig_id){
 	kill(pid, sig_id)
-			cout << "signal " << get_sig_id(sig_id) << " was sent to pid " << pid << endl;
+	cout << "signal " << get_sig_id(sig_id) << " was sent to pid " << pid << endl;
 }
 
 string get_sig_id(int sig_id)
