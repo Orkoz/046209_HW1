@@ -40,7 +40,7 @@ int ExeCmd(char* lineSize, char* cmdString, bool background_flag)
 
 	}
 	AddToHistory(lineSize);
-	RemoveFinishJob();
+//	RemoveFinishJob();
 
 	/*************************************************/
 	if (!strcmp(cmd, "pwd"))
@@ -157,8 +157,8 @@ int ExeCmd(char* lineSize, char* cmdString, bool background_flag)
 		}
 		else
 		{
-			strtok(args[1], "-");
-			args[1] = strtok(NULL, "-");
+			//strtok(args[1], "-");
+			//args[1] = strtok(NULL, "-");
 			if (args[1])
 			if(args[1]==NULL || send_signal(atoi(args[2]), atoi(args[1])))
 			{
@@ -392,13 +392,15 @@ void ExeExternal(char* args[MAX_ARG+3], char* cmdString, bool background_flag)//
 	{
     		case -1:
 					cerr << endl; // print ereor TODO
+					break;
 					
         	case 0 :
                 	// Child Process
                		setpgrp();
 					execvp(args[0],args);
-					cerr << endl; // how print ereor TODO
-					// sanding kill signal TODO
+					cerr << "smash error: > execute - failed" << endl;
+					send_signal(getpid(), SIGTERM);
+					break;
 					
 			default:
 					if(background_flag) // if command is in background, insert the command to jobs
@@ -410,10 +412,11 @@ void ExeExternal(char* args[MAX_ARG+3], char* cmdString, bool background_flag)//
 					{
 						L_Fg_Cmd = job(args[0], pID, false);
 						fgExcites = true;
-						waitpid(pID, NULL, WUNTRACED); // WUNTRACED for stopped processe
+						waitpid(pID, NULL, WUNTRACED); // WUNTRACED for stopped process
 						fgExcites = false;
 
 					}
+					break;
 	}
 }
 
@@ -507,15 +510,11 @@ void kill_job(){
 //**************************************************************************************
 void RemoveFinishJob()
 {
-	int status;
 	list<job>::iterator its;
 	for (its = jobs.begin(); its != jobs.end(); its++)
 	{
-		waitpid(its->getPID(), &status, WNOHANG);
-		if (WIFSIGNALED(status) || (WIFEXITED(status))) // if killing success
-		{
+		if (waitpid(its->getPID(), NULL, WNOHANG) != 0)
 			jobs.erase(its);
-		}
 		if (jobs.size() == 0 || its == jobs.end())
 			break;
 	}
