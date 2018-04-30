@@ -16,7 +16,6 @@ static bool fgExcites = false;
 // Parameters: pointer to jobs, command string, background command flag
 // Returns: 0 - success,1 - failure
 //**************************************************************************************
-
 int ExeCmd(char* lineSize, char* cmdString, bool background_flag)
 {
 	char* cmd;
@@ -189,7 +188,7 @@ int ExeCmd(char* lineSize, char* cmdString, bool background_flag)
 		else if ( num_arg == 0) // no command number - fg for last background cmd
 		{
 			L_Fg_Cmd = jobs.back();
-			jobs.pop_back;
+			jobs.pop_back();
 		}
 		else // ( num_arg == 1) fg for job command number = args[1]
 		{
@@ -218,8 +217,11 @@ int ExeCmd(char* lineSize, char* cmdString, bool background_flag)
 					return 1;
 				}
 				L_Fg_Cmd.stopped_ = false;
+				send_signal(L_Fg_Cmd.pid_, SIGCONT);
 			}
+			fgExcites = true;
 			waitpid(L_Fg_Cmd.pid_, NULL, WUNTRACED); // WUNTRACED for stopped process
+			fgExcites = false;
 			return 0;
 		}
 	}
@@ -382,35 +384,34 @@ void ExeExternal(char* args[MAX_ARG+3], char* cmdString, bool background_flag)//
     	switch(pID = fork())
 	{
     		case -1:
-					// Add your code here (error)
 					cerr << endl; // print ereor TODO
 					
         	case 0 :
                 	// Child Process
                		setpgrp();
-			        // Add your code here (execute an external command)
 					execvp(args[0],args);
 					cerr << endl; // how print ereor TODO
 					// sanding kill signal TODO
 					
 			default:
-                	// Add your code here
-
-
 					if(background_flag) // if command is in background, insert the command to jobs
 					{
-						// add to father job list TODO
+						job new_job = job(args[0], pID, false);
+						new_job.stopped_ = true;
+						new_job.time_ = time(NULL);
+						jobs.push_back(new_job);
 					}
 					else
 					{
-						L_Fg_Cmd = new job(args[0], pID, false);
+						L_Fg_Cmd = job(args[0], pID, false);
 						fgExcites = true;
 						waitpid(pID, NULL, WUNTRACED); // WUNTRACED for stopped processe
-						delete L_Fg_Cmd;
 						fgExcites = false;
+
 					}
 	}
 }
+
 //**************************************************************************************
 // function name: ExeComp
 // Description: edit executes complicated command to executes like normal command
@@ -432,6 +433,7 @@ char* ExeComp(char* lineSize)
 	}
 	return lineSize;
 }
+
 //**************************************************************************************
 // function name: BgCmd
 // Description: check if the command are background command
@@ -449,6 +451,7 @@ bool BgCmd(char* lineSize)
 	return background_flag;
 
 }
+
 //**************************************************************************************
 // function name: AddToHistory
 // Description: add commend to history list. if it's already full (50) delete the first one first
@@ -476,8 +479,6 @@ void stop_job(){
 		new_job.stopped_ = true;
 		new_job.time_ = time(NULL);
 		jobs.push_back(new_job);
-		delete L_Fg_Cmd;
-		fgExcites = false;
 	}
 }
 

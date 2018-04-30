@@ -4,22 +4,23 @@
 
 #include "signals.h"
 
-/*******************************************/
-/* Name: handler_cntlc
-   Synopsis: handle the Control-C */
-
-// Ctrl-Z sigmal handler
+//**************************************************************************************
+// function name: catch_ctrl_z
+// Description: Ctrl-Z signal handler
+// Parameters: None
+// Returns: void
+//**************************************************************************************
 void catch_ctrl_z(int sig_id){
-	stop_job();
+	stop_job(); // forwords the comma
 }
 
 void catch_ctrl_c(int sig_id){
 	kill_job();
 }
 
-string send_signal(pid_t pid, int sig_id){
-	kill(pid, sig_id);
+int send_signal(pid_t pid, int sig_id){
 	cout << "signal " << get_sig_name(sig_id) << " was sent to pid " << pid << endl;
+	return kill(pid, sig_id);
 }
 
 string get_sig_name(int sig_id)
