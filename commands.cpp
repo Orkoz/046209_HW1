@@ -102,7 +102,7 @@ int ExeCmd(char* lineSize, char* cmdString, bool background_flag)
 			list<string>::iterator its;
 			for (its = history.begin(); its != history.end(); its++)
 			{
-				cout << *its << endl;
+				cout << *its;
 			}
 			return 0;
 		}
@@ -315,7 +315,7 @@ int ExeCmd(char* lineSize, char* cmdString, bool background_flag)
 			{
 				success = false;
 				send_signal(its->getPID(), SIGTERM);
-				waitpid(its->getPID(), &status, WUNTRACED);
+				waitpid(its->getPID(), &status, WNOHANG);
 				start_time = clock()/CLOCKS_PER_SEC;
 				end_time = 5 + start_time; // 5 sec wait
 				while((clock()/CLOCKS_PER_SEC) <= end_time) // TODO check
@@ -368,7 +368,7 @@ int ExeCmd(char* lineSize, char* cmdString, bool background_flag)
 	/*************************************************/
 	if (illegal_cmd == true)
 	{
-		cerr << "smash error: > " << lineSize << endl;
+		cerr << "smash error: > " << lineSize;
 		return 1;
 	}
     return 0;
@@ -398,7 +398,7 @@ void ExeExternal(char* args[MAX_ARG+3], char* cmdString, bool background_flag)//
 			default:
 					if(background_flag) // if command is in background, insert the command to jobs
 					{
-						job new_job = job(args[0], pID, false);
+						job new_job(args[0], pID, false);
 						jobs.push_back(new_job);
 					}
 					else
@@ -414,39 +414,33 @@ void ExeExternal(char* args[MAX_ARG+3], char* cmdString, bool background_flag)//
 
 //**************************************************************************************
 // function name: ExeComp
-// Description: edit executes complicated command to executes like normal command
+// Description: check if the command are complicated command
 // Parameters: command string
-// Returns: same command string if not complicated or 'csh -f -c' addtion in the beggining of a complicated command
+// Returns: true if it's a complicated Command or false otherwise
 //**************************************************************************************
-char* ExeComp(char* lineSize, char* cmdString)
+bool ExeComp(char* lineSize)
 {
 	
     if ((strstr(lineSize, "|")) || (strstr(lineSize, "<")) || (strstr(lineSize, ">")) || (strstr(lineSize, "*")) || (strstr(lineSize, "?")) || (strstr(lineSize, ">>")) || (strstr(lineSize, "|&")))
     {
-		const char* temp = lineSize;
-		strcpy (cmdString, "csh -f -c "); // TODO check return?
-		strcat (cmdString, temp); // TODO check return?
-
-    	return cmdString;
+       	return true;
 	}
-	return lineSize;
+	return false;
 }
 
 //**************************************************************************************
 // function name: BgCmd
 // Description: check if the command are background command
 // Parameters: command string
-// Returns: background_flag: true if it's background command or false otherwize
+// Returns: background_flag: true if it's background command or false otherwise
 //**************************************************************************************
 bool BgCmd(char* lineSize)
 {
-	bool background_flag = false;
 	if (lineSize[strlen(lineSize)-2] == '&')
 	{
-		// Add your code here (execute a in the background)
-		background_flag = true;
+		return true;
 	}
-	return background_flag;
+	return false;
 }
 
 //**************************************************************************************
@@ -501,7 +495,7 @@ void RemoveFinishJob()
 	list<job>::iterator its;
 	for (its = jobs.begin(); its != jobs.end(); its++)
 	{
-		waitpid(its->getPID(), &status, WUNTRACED);
+		waitpid(its->getPID(), &status, WNOHANG);
 		if (WIFSIGNALED(status) || (WIFEXITED(status))) // if killing success
 		{
 			jobs.erase(its);

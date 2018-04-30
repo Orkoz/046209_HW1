@@ -25,7 +25,7 @@ char lineSize[MAX_LINE_SIZE+10]; // 10 for complicated command 'csh -f -c';
 //**************************************************************************************
 int main(int argc, char *argv[])
 {
-    char* cmdString;
+    char cmdString[MAX_LINE_SIZE+10]; // 10 for complicated command 'csh -f -c';;
     bool background_flag;
 
 	//signal declaretions
@@ -43,8 +43,18 @@ int main(int argc, char *argv[])
     	{
 	 	printf("smash > ");
 		fgets(lineSize, MAX_LINE_SIZE, stdin);
-		strcpy(cmdString, lineSize);
-		cmdString = ExeComp(lineSize, cmdString); // edit a complicated Command for easy execute if needed
+
+		if(ExeComp(lineSize)) // if complicated Command edit a "csh -f -c "
+		{
+			const char* temp = lineSize;
+			strcpy (cmdString, "csh -f -c ");
+			strcat (cmdString, temp);
+		}
+		else
+		{
+			strcpy(cmdString, lineSize);
+		}
+
 		cmdString[strlen(cmdString)-1]='\0';
 	 	background_flag = BgCmd(lineSize); // check if it's background command			
 		if (background_flag) // if it's background command change '&' to '\0'
