@@ -1,6 +1,6 @@
 // signals.cpp
 // contains signal handler functions
-// contains the function/s that set the signal handlers
+// contains the function/s that set the signal handlers (catch_ctrl_z, catch_ctrl_c)
 
 #include "signals.h"
 

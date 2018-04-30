@@ -28,16 +28,12 @@ int main(int argc, char *argv[])
     char cmdString[MAX_LINE_SIZE+10]; // 10 for complicated command 'csh -f -c';;
     bool background_flag;
 
-	//signal declaretions
+	//signal declarations
 	//NOTE: the signal handlers and the function/s that sets the handler should be found in siganls.c
-	 /* add your code here */
 
     struct sigaction act;
     act.sa_handler = &catch_ctrl_z;
     sigaction(SIGTSTP,&act,NULL);
-
-	/************************************/
-	// Init globals
 
     while (1)
     	{

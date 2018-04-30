@@ -1,5 +1,10 @@
-//		commands.cpp
-//********************************************
+/*
+ * commands.cpp
+ * The model handles the command executions and the management of jobs (process).
+ * "ExeCmd" interprets and executes built-in commands and "ExeExternal" executes external command
+ *
+ */
+
 #include "commands.h"
 
 
@@ -458,7 +463,12 @@ void AddToHistory(char* lineSize)
 	history.push_back(lineSize);
 }
 
-
+//**************************************************************************************
+// function name: stop_job
+// Description: stop the run of the foreground (if exists) job and add it to the jobs list.
+// Parameters: none.
+// Returns: void
+//**************************************************************************************
 void stop_job(){
 	if (fgExcites){
 		job new_job = job(L_Fg_Cmd);
@@ -472,6 +482,12 @@ void stop_job(){
 	}
 }
 
+//**************************************************************************************
+// function name: kill_job
+// Description: terminates the foreground job (if exists).
+// Parameters: none.
+// Returns: void
+//**************************************************************************************
 void kill_job(){
 	if (fgExcites){
 		if(send_signal(L_Fg_Cmd.getPID(), SIGINT))
