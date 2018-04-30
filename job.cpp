@@ -12,7 +12,7 @@
 // Parameters: None
 // Returns: job object
 //**************************************************************************************
-job::job():name_(NULL),pid_(NULL),stopped_(false){time(&time_);}
+job::job():name_(""),pid_(0),stopped_(false){time(&time_);}
 
 //**************************************************************************************
 // function name: job
@@ -63,4 +63,4 @@ double job::getTime(){return difftime(time(NULL),time_);}
 bool job::isStopped(){return stopped_;}
 void job::stopJob(){stopped_ = true;}
 void job::continueJob(){stopped_ = false;}
-}
+
