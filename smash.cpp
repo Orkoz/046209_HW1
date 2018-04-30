@@ -38,28 +38,33 @@ int main(int argc, char *argv[])
     while (1)
     	{
 	 	printf("smash > ");
-		fgets(lineSize, MAX_LINE_SIZE, stdin);
-
-		if(ExeComp(lineSize)) // if complicated Command edit a "csh -f -c "
+		if(fgets(lineSize, MAX_LINE_SIZE, stdin))
 		{
-			const char* temp = lineSize;
-			strcpy (cmdString, "csh -f -c ");
-			strcat (cmdString, temp);
+			if(ExeComp(lineSize)) // if complicated Command edit a "csh -f -c "
+			{
+				const char* temp = lineSize;
+				strcpy (cmdString, "csh -f -c ");
+				strcat (cmdString, temp);
+			}
+			else
+			{
+				strcpy(cmdString, lineSize);
+			}
+
+			cmdString[strlen(cmdString)-1]='\0';
+			background_flag = BgCmd(lineSize); // check if it's background command
+			if (background_flag) // if it's background command change '&' to '\0'
+			{
+				cmdString[strlen(cmdString)-2] = '\0';
+			}
+
+			// all commands
+			ExeCmd(lineSize, cmdString, background_flag);
 		}
 		else
 		{
-			strcpy(cmdString, lineSize);
+			cout << "smash error: > fgets" << endl;
 		}
-
-		cmdString[strlen(cmdString)-1]='\0';
-	 	background_flag = BgCmd(lineSize); // check if it's background command			
-		if (background_flag) // if it's background command change '&' to '\0'
-		{
-			cmdString[strlen(cmdString)-2] = '\0';
-		}
-		
-		// all commands
-		ExeCmd(lineSize, cmdString, background_flag);
 
 		/* initialize for next line read*/
 		lineSize[0]='\0';
