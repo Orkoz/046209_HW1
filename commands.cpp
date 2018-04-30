@@ -212,7 +212,7 @@ int ExeCmd(char* lineSize, char* cmdString, bool background_flag)
 		}
 		if(!illegal_cmd)
 		{
-			cout << L_Fg_Cmd.getName()_<< endl;
+			cout << L_Fg_Cmd.getName() << endl;
 			if(L_Fg_Cmd.isStopped())
 			{
 				if(send_signal(L_Fg_Cmd.getPID() , SIGCONT))
@@ -447,7 +447,6 @@ bool BgCmd(char* lineSize)
 		background_flag = true;
 	}
 	return background_flag;
-
 }
 
 //**************************************************************************************

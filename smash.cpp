@@ -17,7 +17,7 @@ main file. This file contains the main function of smash
 
 using namespace std;
 
-char lineSize[MAX_LINE_SIZE];
+char lineSize[MAX_LINE_SIZE+10]; // 10 for complicated command 'csh -f -c';
 
 //**************************************************************************************
 // function name: main
@@ -25,7 +25,7 @@ char lineSize[MAX_LINE_SIZE];
 //**************************************************************************************
 int main(int argc, char *argv[])
 {
-    char cmdString[MAX_LINE_SIZE+10]; // 10 for complicated command 'csh -f -c';
+    char* cmdString;
     bool background_flag;
 
 	//signal declaretions
