@@ -72,9 +72,9 @@ int ExeCmd(char* lineSize, char* cmdString, bool background_flag)
 				return 1;
 			}
 			char temp[MAX_PATH_SIZE];
-			temp = pwd;
-			pwd = pwd_pre;
-			pwd_pre = temp;
+			strcpy(temp,pwd);
+			strcpy(pwd,pwd_pre);
+			strcpy(pwd_pre,temp);
 			cout << pwd << endl;
 			return 0;
 		}
@@ -85,8 +85,8 @@ int ExeCmd(char* lineSize, char* cmdString, bool background_flag)
 				cerr << "smash error: > " << args[1] << " - path not found " << endl;
 				return 1;
 			}
-			pwd_pre = pwd;
-			pwd = args[1];
+			strcpy(pwd_pre,pwd);
+			strcpy(pwd,args[1]);
 			return 0;
 		}
 	}
@@ -97,7 +97,7 @@ int ExeCmd(char* lineSize, char* cmdString, bool background_flag)
 		{
 			illegal_cmd = true;
 		}
-		else if(!history.empty)
+		else if(!history.empty())
 		{
 			list<string>::iterator its;
 			for (its = history.begin(); its != history.end(); its++)
@@ -118,13 +118,17 @@ int ExeCmd(char* lineSize, char* cmdString, bool background_flag)
 		{
 			illegal_cmd = true;
 		}
-		else if(!jobs.empty)
+		else if(!jobs.empty())
 		{
 			list<job>::iterator its;
 			int i = 0;
 			for (its = jobs.begin(); its != jobs.end(); its++)
 			{
-				cout << "[" << i << "] " << its->getName() << " " << its->getPID() << " " << its->getTime() << " sec (Stopped)" << endl;
+				cout << "[" << i << "] " << its->getName() << " " << its->getPID() << " " << its->getTime() << " sec";
+				if(its->isStopped())
+					cout << " (Stopped)" << endl;
+				else
+					cout << endl;
 				i++;
 			}
 			return 0;
@@ -180,7 +184,7 @@ int ExeCmd(char* lineSize, char* cmdString, bool background_flag)
 		{
 			illegal_cmd = true;
 		}
-		else if ( jobs.empty )
+		else if ( jobs.empty() )
 		{
 			cerr << "smash error: > fg - jobs list is empty" << endl;
 			return 1;
@@ -192,8 +196,8 @@ int ExeCmd(char* lineSize, char* cmdString, bool background_flag)
 		}
 		else // ( num_arg == 1) fg for job command number = args[1]
 		{
-			int cmd_num = atoi(args[1]);
-			if(cmd_num > jobs.size)
+			unsigned int cmd_num = atoi(args[1]);
+			if(cmd_num > jobs.size())
 			{
 				cerr << "smash error: > fg - args[1] is exceed the jobs list size" << endl;
 				return 1;
@@ -208,19 +212,19 @@ int ExeCmd(char* lineSize, char* cmdString, bool background_flag)
 		}
 		if(!illegal_cmd)
 		{
-			cout << L_Fg_Cmd.name_ << endl;
-			if(L_Fg_Cmd.stopped_)
+			cout << L_Fg_Cmd.getName()_<< endl;
+			if(L_Fg_Cmd.isStopped())
 			{
-				if(send_signal(L_Fg_Cmd.pid_, SIGCONT))
+				if(send_signal(L_Fg_Cmd.getPID() , SIGCONT))
 				{
 					cerr << "smash error: > fg – cannot send signal" << endl;
 					return 1;
 				}
-				L_Fg_Cmd.stopped_ = false;
-				send_signal(L_Fg_Cmd.pid_, SIGCONT);
+				L_Fg_Cmd.continueJob();
+				send_signal(L_Fg_Cmd.getPID() , SIGCONT);
 			}
 			fgExcites = true;
-			waitpid(L_Fg_Cmd.pid_, NULL, WUNTRACED); // WUNTRACED for stopped process
+			waitpid(L_Fg_Cmd.getPID(), NULL, WUNTRACED); // WUNTRACED for stopped process
 			fgExcites = false;
 			return 0;
 		}
@@ -232,7 +236,7 @@ int ExeCmd(char* lineSize, char* cmdString, bool background_flag)
 		{
 			illegal_cmd = true;
 		}
-		else if ( jobs.empty )
+		else if ( jobs.empty() )
 		{
 			cerr << "smash error: > bg - jobs list is empty" << endl;
 			return 1;
@@ -242,7 +246,7 @@ int ExeCmd(char* lineSize, char* cmdString, bool background_flag)
 			list<job>::iterator its;
 			for(its = jobs.end(); its != jobs.begin(); its--)
 			{
-				if(*its->isStopped())
+				if(its->isStopped())
 				{
 					if(send_signal(its->getPID(), SIGCONT))
 					{
@@ -250,7 +254,7 @@ int ExeCmd(char* lineSize, char* cmdString, bool background_flag)
 						return 1;
 					}
 					cout << its->getName() << endl;
-					*its->isStopped() = false;
+					its->continueJob();
 					return 0;
 					break;
 				}
@@ -260,8 +264,8 @@ int ExeCmd(char* lineSize, char* cmdString, bool background_flag)
 		}	
 		else // ( num_arg == 1) bg for job command number = args[1]
 		{
-			int cmd_num = atoi(args[1]);
-			if(cmd_num > jobs.size)
+			unsigned int cmd_num = atoi(args[1]);
+			if(cmd_num > jobs.size())
 			{
 				cerr << "smash error: > bg - args[1] is exceed the jobs list size" << endl;
 				return 1;
@@ -270,7 +274,7 @@ int ExeCmd(char* lineSize, char* cmdString, bool background_flag)
 			{
 				list<job>::iterator its = jobs.begin();
 				std::advance(its, cmd_num-1);
-				if(*its->isStopped())
+				if(its->isStopped())
 				{
 					if(send_signal(its->getPID(), SIGCONT))
 					{
@@ -278,7 +282,7 @@ int ExeCmd(char* lineSize, char* cmdString, bool background_flag)
 						return 1;
 					}
 					cout << its->getName() << endl;
-					*its->isStopped() = false;
+					its->continueJob();
 					return 0;	
 				}
 				else
@@ -328,12 +332,10 @@ int ExeCmd(char* lineSize, char* cmdString, bool background_flag)
 					send_signal(its->getPID() ,SIGKILL); // SIGKILL mast success
 					cout << "Done." << endl;
 				}
-			}
-			its = jobs.begin();
-			while (its)
-			{
 				jobs.erase(its);
-				its++;
+				if (jobs.size() == 0 || its == jobs.end())
+					break;
+
 			}
 			exit(1);
 		}
@@ -416,18 +418,16 @@ void ExeExternal(char* args[MAX_ARG+3], char* cmdString, bool background_flag)//
 // Parameters: command string
 // Returns: same command string if not complicated or 'csh -f -c' addtion in the beggining of a complicated command
 //**************************************************************************************
-char* ExeComp(char* lineSize)
+char* ExeComp(char* lineSize, char* cmdString)
 {
 	
     if ((strstr(lineSize, "|")) || (strstr(lineSize, "<")) || (strstr(lineSize, ">")) || (strstr(lineSize, "*")) || (strstr(lineSize, "?")) || (strstr(lineSize, ">>")) || (strstr(lineSize, "|&")))
     {
-		// Add your code here
-		char ExtCmd[MAX_LINE_SIZE+10]; // 10 for complicated command 'csh -f -c'];
-		const char* temp =  &lineSize;
-		strcpy (ExtCmd, "csh -f -c "); // TODO check return?
-		strcat (ExtCmd, temp); // TODO check return?
+		const char* temp = lineSize;
+		strcpy (cmdString, "csh -f -c "); // TODO check return?
+		strcat (cmdString, temp); // TODO check return?
 
-    	return ExtCmd;
+    	return cmdString;
 	}
 	return lineSize;
 }
@@ -458,9 +458,9 @@ bool BgCmd(char* lineSize)
 //**************************************************************************************
 void AddToHistory(char* lineSize)
 {
-	if(history.size == MAX_HISTORY_SIZE)
+	if(history.size() == MAX_HISTORY_SIZE)
 	{
-		history.pop_front;
+		history.pop_front();
 	}
 	history.push_back(lineSize);
 }
@@ -474,8 +474,7 @@ void stop_job(){
 			cerr << "smash error: > Ctrl-Z - cannot send signal" << endl;
 			return;
 		}
-		new_job.stopped_ = true;
-		new_job.time_ = time(NULL);
+		new_job.stopJob();
 		jobs.push_back(new_job);
 	}
 }
@@ -487,7 +486,6 @@ void kill_job(){
 			cerr << "smash error: > Ctrl-Z - cannot send signal" << endl;
 			return;
 		}
-		delete L_Fg_Cmd;
 		fgExcites = false;
 	}
 }
@@ -509,7 +507,7 @@ void RemoveFinishJob()
 		{
 			jobs.erase(its);
 		}
-		if (jobs.size() == 0 || its == jobs.end()) //job list is empty after deletion / deleted last element
+		if (jobs.size() == 0 || its == jobs.end())
 			break;
 	}
 }
