@@ -1,14 +1,13 @@
 #ifndef _SIGS_H
 #define _SIGS_H
-#include <unistd.h>
-#include <stdio.h>
-#include <time.h>
-#include <stdlib.h>
-#include <signal.h>
-#include <string.h>
 #include <sys/types.h>
 #include <sys/wait.h>
-#include <iostream>
+#include <unistd.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string>
+#include <signal.h>
+#include<iostream>
 #include <string>
 #include <list>
 #include <time.h>

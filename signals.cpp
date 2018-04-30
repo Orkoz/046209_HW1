@@ -11,6 +11,7 @@
 // Returns: void
 //**************************************************************************************
 void catch_ctrl_z(int sig_id){
+	cout << sig_id << endl;
 	stop_job(); // forwards the command handle to “commands” how manage the jobs
 }
 

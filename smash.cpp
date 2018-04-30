@@ -31,9 +31,28 @@ int main(int argc, char *argv[])
 	//signal declarations
 	//NOTE: the signal handlers and the function/s that sets the handler should be found in siganls.c
 
-    struct sigaction act;
-    act.sa_handler = &catch_ctrl_z;
-    sigaction(SIGTSTP,&act,NULL);
+    /*struct sigaction act_c;
+    sigset_t sigmask_c;
+	sigfillset(&sigmask_c);
+	act_c.sa_mask = sigmask_c;
+	act_c.sa_handler = &catch_ctrl_c;
+	act_c.sa_flags = 0;
+	*/
+
+
+    struct sigaction act_z;
+	sigset_t sigmask_z;
+	sigfillset(&sigmask_z);
+	act_z.sa_mask = sigmask_z;
+	act_z.sa_flags = 0;
+	act_z.sa_handler = &catch_ctrl_z;
+
+	if (sigaction(SIGTSTP, &act_z, NULL) == -1)
+		cerr << "signal handler Ctrl-Z failed" << endl;
+	/*
+	if (sigaction(SIGINT, &act_c, NULL) == -1)
+			cerr << "signal handler Ctrl-C failed" << endl;
+			*/
 
     while (1)
     	{
