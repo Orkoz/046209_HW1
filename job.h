@@ -24,19 +24,18 @@ using namespace std;
 
 class job {
 public:
-
+	job();
 	job(string name, int pid, bool stopped);
 	job(const job &src_job);
 	string getName();
 	int getPID();
-	int getTime();
+	double getTime();
 	bool isStopped();
 	void stopJob();
 	void continueJob();
 
-
-
 private:
+
 	string name_;
     int pid_;
     time_t time_;
