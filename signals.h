@@ -1,19 +1,28 @@
 #ifndef _SIGS_H
 #define _SIGS_H
+#include <unistd.h>
+#include <stdio.h>
+#include <time.h>
+#include <stdlib.h>
+#include <signal.h>
+#include <string.h>
 #include <sys/types.h>
 #include <sys/wait.h>
-#include <unistd.h> 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <job.h>
-#include "signals.h"
-#include "commands.h"
+#include <iostream>
+#include <string>
 #include <list>
-using std::list;
+#include <time.h>
+#include <job.h>
+#include "commands.h"
+
+using namespace std;
+
+
 
 #endif
 
-void catch_ctrl_z(int sig_num);
+void catch_ctrl_z(int sig_id);
+string send_signal(pid_t pid, int sig_id);
+string get_sig_id(int sig_id);
 
 

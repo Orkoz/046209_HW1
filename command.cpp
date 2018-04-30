@@ -390,7 +390,7 @@ void ExeExternal(char* args[MAX_ARG+3], char* cmdString, bool background_flag)//
 					else
 					{
 						fg_job = new job(args[0], pID, false);
-						waitpid(pID, &state, WUNTRACED) // WUNTRACED for stopped processe
+						waitpid(pID, NULL, WUNTRACED); // WUNTRACED for stopped processe
 					}
 	}
 }
@@ -453,7 +453,6 @@ void stop_job(){
 	new_job.time_ = time(NULL);
 	jobs.push_back(new_job);
 	//L_Fg_Cmd = NULL; // TODO that the way to do that??
-	printf("\n"); // ???? TODO
 }
 
 
