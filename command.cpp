@@ -400,7 +400,7 @@ void ExeExternal(char* args[MAX_ARG+3], char* cmdString, bool background_flag)//
 // Parameters: command string
 // Returns: same command string if not complicated or 'csh -f -c' addtion in the beggining of a complicated command
 //**************************************************************************************
-string ExeComp(char* lineSize)
+char* ExeComp(char* lineSize)
 {
 	
     if ((strstr(lineSize, "|")) || (strstr(lineSize, "<")) || (strstr(lineSize, ">")) || (strstr(lineSize, "*")) || (strstr(lineSize, "?")) || (strstr(lineSize, ">>")) || (strstr(lineSize, "|&")))
@@ -453,7 +453,6 @@ void stop_job(){
 	new_job.time_ = time(NULL);
 	jobs.push_back(new_job);
 	//L_Fg_Cmd = NULL; // TODO that the way to do that??
-	printf("\n"); // ???? TODO
 }
 
 
