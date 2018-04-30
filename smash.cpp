@@ -17,8 +17,6 @@ main file. This file contains the main function of smash
 
 using namespace std;
 
-void stop_job();
-
 char lineSize[MAX_LINE_SIZE];
 //**************************************************************************************
 // function name: main
@@ -26,8 +24,8 @@ char lineSize[MAX_LINE_SIZE];
 //**************************************************************************************
 int main(int argc, char *argv[])
 {
-    char cmdString[MAX_LINE_SIZE];
-
+    char cmdString[MAX_LINE_SIZE+10]; // 10 for complicated command 'csh -f -c'];
+    bool background_flag;
 
 	//signal declaretions
 	//NOTE: the signal handlers and the function/s that sets the handler should be found in siganls.c
@@ -51,14 +49,14 @@ int main(int argc, char *argv[])
     	{
 	 	printf("smash > ");
 		fgets(lineSize, MAX_LINE_SIZE, stdin);
+
+		lineSize = ExeComp(lineSize); // if command is a complicated Command add 'csh -f -c'
+		background_flag = BgCmd(lineSize); // if commend background command
+					// built in commands
+		ExeCmd(lineSize, cmdString, background_flag);
+
 		strcpy(cmdString, lineSize);
 		cmdString[strlen(lineSize)-1]='\0';
-					// perform a complicated Command
-		lineSize = ExeComp(lineSize)); 
-					// background command	
-	 	if(!BgCmd(lineSize)) continue;
-					// built in commands
-		ExeCmd(lineSize, cmdString);
 
 		/* initialize for next line read*/
 		lineSize[0]='\0';

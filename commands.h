@@ -10,7 +10,11 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <time.h>
+#include <string>
+#include <list>
 #include "job.h"
+
+using namespace std;
 
 #define MAX_LINE_SIZE 80
 #define MAX_ARG 20
