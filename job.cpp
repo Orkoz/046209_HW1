@@ -1,11 +1,13 @@
 /*
  * job.cpp
+ * A model of a single job (process).
+ * Defines functionד to manage a single job: write (stopJob,continueJob)
+ * 		and read (getName,getPID,getTime,isStopped) its values.
  *
- *  Created on: Apr 26, 2018
- *      Author: os
  */
 
 #include "job.h"
+
 //**************************************************************************************
 // function name: job
 // Description: empty constructor
