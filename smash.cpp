@@ -17,7 +17,7 @@ main file. This file contains the main function of smash
 
 using namespace std;
 
-char lineSize[MAX_LINE_SIZE+10];
+char lineSize[MAX_LINE_SIZE];
 
 //**************************************************************************************
 // function name: main
@@ -37,29 +37,20 @@ int main(int argc, char *argv[])
     sigaction(SIGTSTP,&act,NULL);
 
 	/************************************/
-	//NOTE: the signal handlers and the function/s that sets the handler should be found in siganls.c
-	//set your signal handlers here
-	/* add your code here */
-
-	/************************************/
-
-	/************************************/
 	// Init globals
 
     while (1)
     	{
 	 	printf("smash > ");
 		fgets(lineSize, MAX_LINE_SIZE, stdin);
-				
-		lineSize = ExeComp(lineSize)); // edit a complicated Command for easy execute if needed
-						
+		strcpy(cmdString, lineSize);
+		cmdString = ExeComp(lineSize); // edit a complicated Command for easy execute if needed
+		cmdString[strlen(cmdString)-1]='\0';
 	 	background_flag = BgCmd(lineSize); // check if it's background command			
 		if (background_flag) // if it's background command change '&' to '\0'
 		{
-			lineSize[strlen(lineSize)-2] = '\0';
+			cmdString[strlen(cmdString)-2] = '\0';
 		}
-		strcpy(cmdString, lineSize);
-		cmdString[strlen(lineSize)-1]='\0';
 		
 		// all commands
 		ExeCmd(lineSize, cmdString, background_flag);
