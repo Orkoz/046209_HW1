@@ -1,11 +1,13 @@
 /*
  * job.cpp
+ * A model of a single job (process).
+ * Defines functionד to manage a single job: write (stopJob,continueJob)
+ * 		and read (getName,getPID,getTime,isStopped) its values.
  *
- *  Created on: Apr 26, 2018
- *      Author: os
  */
 
 #include "job.h"
+
 //**************************************************************************************
 // function name: job
 // Description: empty constructor
@@ -56,11 +58,32 @@ int job::getPID(){return pid_;}
 //**************************************************************************************
 // function name: getTime
 // Description: return the time that passed since the job was inserted to jobs list
-// Parameters: int.
-// Returns: (int) job (process) pid
+// Parameters: none.
+// Returns: (double) the time that passed since the job was inserted to jobs list
 //**************************************************************************************
 double job::getTime(){return difftime(time(NULL),time_);}
+
+//**************************************************************************************
+// function name: isStopped
+// Description: return if the job (process) is running or not
+// Parameters: none.
+// Returns: (boll) 1- the process is stopped, 0- the process is running.
+//**************************************************************************************
 bool job::isStopped(){return stopped_;}
+
+//**************************************************************************************
+// function name: stopJob
+// Description: stops the job (process) from running.
+// Parameters: none.
+// Returns: none.
+//**************************************************************************************
 void job::stopJob(){stopped_ = true;}
+
+//**************************************************************************************
+// function name: continueJob
+// Description: resuming the job (process) run.
+// Parameters: none.
+// Returns: none.
+//**************************************************************************************
 void job::continueJob(){stopped_ = false;}
 
