@@ -23,7 +23,7 @@ int ExeCmd(char* lineSize, char* cmdString, bool background_flag)
 	const char* delimiters = " \t\n";
 	int i = 0, num_arg = 0;
 	bool illegal_cmd = false; // illegal command
-    	cmd = strtok(lineSize, delimiters);
+    	cmd = strtok(cmdString, delimiters);
 	if (cmd == NULL)
 		return 0;
    	args[0] = cmd;
@@ -35,6 +35,7 @@ int ExeCmd(char* lineSize, char* cmdString, bool background_flag)
 
 	}
 	AddToHistory(lineSize);
+	RemoveFinishJob();
 
 	/*************************************************/
 	if (!strcmp(cmd, "pwd"))
@@ -123,8 +124,7 @@ int ExeCmd(char* lineSize, char* cmdString, bool background_flag)
 			int i = 0;
 			for (its = jobs.begin(); its != jobs.end(); its++)
 			{
-				cout << "[" << i << "] " << *its->printJob();
-						cout << endl; // TODO printJob func
+				cout << "[" << i << "] " << its->printJob() << endl;
 				i++;
 			}
 			return 0;
@@ -150,7 +150,7 @@ int ExeCmd(char* lineSize, char* cmdString, bool background_flag)
 		{
 			strtok(args[1], "-");
 			args[1] = strtok(NULL, "-");
-			//if(!kill_raper(args[2], args[1]))// sending signal fail TODO kill_raper func
+			if(!send_signal(args[2], args[1]))// sending signal fail TODO kill_raper func
 			{
 				cerr << "smash error: > kill job – cannot send signal" << endl;
 				return 1;				
@@ -211,7 +211,7 @@ int ExeCmd(char* lineSize, char* cmdString, bool background_flag)
 			if(L_Fg_Cmd.stopped_)
 			{
 				L_Fg_Cmd.stopped_ = false;
-				//rep_kill(L_Fg_Cmd.pid_, SIGCONT); // TODO rep_kill func and signal SIGCONT
+				send_signal(L_Fg_Cmd.pid_, SIGCONT); // signal SIGCONT??
 			}
 			waitpid(L_Fg_Cmd.pid_, NULL, WUNTRACED); // WUNTRACED for stopped process
 			return 0;
@@ -236,7 +236,7 @@ int ExeCmd(char* lineSize, char* cmdString, bool background_flag)
 			{
 				if(*its->isStopped())
 				{
-					cout << *its->getName() << endl; // TODO change to char*
+					cout << its->getName() << endl;
 //					rep_kill(*its->getPID, sigACTION); // TODO rep_kill func and signal sigACTION
 					*its->isStopped() = false;
 					return 0;
@@ -295,7 +295,7 @@ int ExeCmd(char* lineSize, char* cmdString, bool background_flag)
 			{
 				success = false;
 //				rep_kill(*its->getPID(), SIGTERM);  // TODO rep_kill func and signal SIGTERM
-				waitpid(*its->getPID(), &status, WUNTRACED);
+				waitpid(its->getPID(), &status, WUNTRACED);
 				start_time = clock();
 				end_time = 5000 + start_time; // 5 sec wait
 				while(clock() <= end_time) // beasy wait?? TODO
@@ -400,7 +400,7 @@ void ExeExternal(char* args[MAX_ARG+3], char* cmdString, bool background_flag)//
 // Parameters: command string
 // Returns: same command string if not complicated or 'csh -f -c' addtion in the beggining of a complicated command
 //**************************************************************************************
-string ExeComp(char* lineSize)
+char* ExeComp(char* lineSize)
 {
 	
     if ((strstr(lineSize, "|")) || (strstr(lineSize, "<")) || (strstr(lineSize, ">")) || (strstr(lineSize, "*")) || (strstr(lineSize, "?")) || (strstr(lineSize, ">>")) || (strstr(lineSize, "|&")))
@@ -453,6 +453,22 @@ void stop_job(){
 	new_job.time_ = time(NULL);
 	jobs.push_back(new_job);
 	//L_Fg_Cmd = NULL; // TODO that the way to do that??
+}
+
+void RemoveFinishJob()
+{
+	int status;
+	list<job>::iterator its;
+	for (its = jobs.begin(); its != jobs.end(); its++)
+	{
+		waitpid(its->getPID(), &status, WUNTRACED);
+		if (WIFSIGNALED(status) || (WIFEXITED(status))) // if killing success
+		{
+			jobs.erase(its);
+		}
+		if (jobs.size() == 0 || its == jobs.end()) //job list is empty after deletion / deleted last element
+			break;
+	}
 }
 
 
