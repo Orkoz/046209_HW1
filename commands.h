@@ -25,7 +25,7 @@ using namespace std;
 
 int ExeCmd(char* lineSize, char* cmdString, bool background_flag);
 void ExeExternal(char* args[MAX_ARG+3], char* cmdString, bool background_flag);
-char* ExeComp(char* lineSize, char* cmdString);
+bool ExeComp(char* lineSize);
 bool BgCmd(char* lineSize);
 void AddToHistory(char* lineSize);
 void stop_job();
