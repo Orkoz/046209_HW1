@@ -44,7 +44,7 @@ int main(int argc, char *argv[])
 	 	printf("smash > ");
 		fgets(lineSize, MAX_LINE_SIZE, stdin);
 		strcpy(cmdString, lineSize);
-		cmdString = ExeComp(lineSize); // edit a complicated Command for easy execute if needed
+		cmdString = ExeComp(lineSize, cmdString); // edit a complicated Command for easy execute if needed
 		cmdString[strlen(cmdString)-1]='\0';
 	 	background_flag = BgCmd(lineSize); // check if it's background command			
 		if (background_flag) // if it's background command change '&' to '\0'

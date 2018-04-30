@@ -12,7 +12,7 @@
 #include <string>
 #include <list>
 #include <time.h>
-#include <job.h>
+#include "job.h"
 #include "commands.h"
 
 using namespace std;
