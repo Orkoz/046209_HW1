@@ -8,6 +8,7 @@ static char pwd[MAX_PATH_SIZE];
 static char pwd_pre[MAX_PATH_SIZE];
 static list<string> history;
 static job L_Fg_Cmd;
+static bool fgExcites = false;
 
 //********************************************
 // function name: ExeCmd
@@ -389,8 +390,11 @@ void ExeExternal(char* args[MAX_ARG+3], char* cmdString, bool background_flag)//
 					}
 					else
 					{
-						fg_job = new job(args[0], pID, false);
+						L_Fg_Cmd = new job(args[0], pID, false);
+						fgExcites = true;
 						waitpid(pID, NULL, WUNTRACED); // WUNTRACED for stopped processe
+						delete L_Fg_Cmd;
+						fgExcites = false;
 					}
 	}
 }
@@ -448,11 +452,23 @@ void AddToHistory(char* lineSize)
 	}
 
 void stop_job(){
-	job new_job = job(L_Fg_Cmd);
-	new_job.stopped_ = true;
-	new_job.time_ = time(NULL);
-	jobs.push_back(new_job);
-	//L_Fg_Cmd = NULL; // TODO that the way to do that??
+	if (fgExcites){
+		job new_job = job(L_Fg_Cmd);
+		send_signal(new_job.getPID(), SIGTSTP);
+		new_job.stopped_ = true;
+		new_job.time_ = time(NULL);
+		jobs.push_back(new_job);
+		delete L_Fg_Cmd;
+		fgExcites = false;
+	}
+}
+
+void kill_job(){
+	if (fgExcites){
+		send_signal(L_Fg_Cmd.getPID(), SIGINT);
+		delete L_Fg_Cmd;
+		fgExcites = false;
+	}
 }
 
 
