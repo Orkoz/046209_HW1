@@ -33,7 +33,6 @@ public:
 	bool isStopped();
 	void stopJob();
 	void continueJob();
-	string printJob();
 
 
 

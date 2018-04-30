@@ -9,8 +9,10 @@
 
 job::job(string name, int pid, bool stopped):name_(name),pid_(pid),stopped_(stopped){time(&time_);}
 job::job(const job &src_job){
-	name_ = src_job.getName();
-
+	name_ = src_job.name_();
+	pid_ = src_job.pid_();
+	stopped_ = src_job.stopped_();
+	time(&time_);
 }
 string job::getName(){return name_;}
 int job::getPID(){return pid_;}
@@ -18,9 +20,4 @@ int job::getTime(){return time_;}
 bool job::isStopped(){return stopped_;}
 void job::stopJob(){stopped_ = true;}
 void job::continueJob(){stopped_ = false;}
-string job::printJob(){
-	if (stopped_ == true)
-		cout << name_ << " " << pid_ << " " << time << " sec (Stopped)" << endl;
-	else
-		cout << name_ << " " << pid_ << " " << time << " sec" << endl;
 }

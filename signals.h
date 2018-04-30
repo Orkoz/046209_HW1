@@ -23,7 +23,7 @@ using namespace std;
 
 void catch_ctrl_z(int sig_id);
 void catch_ctrl_c(int sig_id);
-string send_signal(pid_t pid, int sig_id);
+int send_signal(pid_t pid, int sig_id);
 string get_sig_name(int sig_id);
 
 
