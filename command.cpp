@@ -390,7 +390,7 @@ void ExeExternal(char* args[MAX_ARG+3], char* cmdString, bool background_flag)//
 					else
 					{
 						fg_job = new job(args[0], pID, false);
-						waitpid(pID, &state, WUNTRACED) // WUNTRACED for stopped processe
+						waitpid(pID, NULL, WUNTRACED); // WUNTRACED for stopped processe
 					}
 	}
 }

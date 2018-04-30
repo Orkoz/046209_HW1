@@ -18,6 +18,6 @@ int job::getTime(){return time_;}
 bool job::isStopped(){return stopped_;}
 void job::stopJob(){stopped_ = true;}
 void job::continueJob(){stopped_ = false;}
-void job::printJob(){
+string job::printJob(){
 	cout << name_ << " " << pid_ << " " << time << " sec" << endl;
 }
