@@ -46,7 +46,7 @@ int ExeCmd(char* lineSize, char* cmdString, bool background_flag)
 		}
 		else if (getcwd(pwd, MAX_LINE_SIZE)==NULL)
 		{
-			cerr << endl; // print error message TODO
+			cerr << "smash error: > pwd - pwd not found" << endl; // print error message TODO
 			return 1;
 		}
 		else
@@ -66,7 +66,7 @@ int ExeCmd(char* lineSize, char* cmdString, bool background_flag)
 		
 		else if ( !strcmp(args[1],"-") )
 		{
-			if (!pwd_pre || chdir(pwd_pre)) // if pwd_pre==NULL or path not found
+			if (pwd_pre==NULL || chdir(pwd_pre)) // if pwd_pre==NULL or change dir not success
 			{
 				cerr << "smash error: > " << args[1] << " - path not found" << endl;
 				return 1;
@@ -124,7 +124,7 @@ int ExeCmd(char* lineSize, char* cmdString, bool background_flag)
 			int i = 0;
 			for (its = jobs.begin(); its != jobs.end(); its++)
 			{
-				cout << "[" << i << "] " << its->printJob() << endl;
+				cout << "[" << i << "] " << its->getName() << " " << its->getPID() << " " << its->getTime() << " sec (Stopped)" << endl;
 				i++;
 			}
 			return 0;
@@ -150,7 +150,8 @@ int ExeCmd(char* lineSize, char* cmdString, bool background_flag)
 		{
 			strtok(args[1], "-");
 			args[1] = strtok(NULL, "-");
-			if(!send_signal(args[2], args[1]))// sending signal fail TODO kill_raper func
+			if (args[1])
+			if(args[1]==NULL || send_signal(atoi(args[2]), atoi(args[1])))
 			{
 				cerr << "smash error: > kill job – cannot send signal" << endl;
 				return 1;				
@@ -210,6 +211,11 @@ int ExeCmd(char* lineSize, char* cmdString, bool background_flag)
 			cout << L_Fg_Cmd.name_ << endl;
 			if(L_Fg_Cmd.stopped_)
 			{
+				if(send_signal(L_Fg_Cmd.pid_, SIGCONT))
+				{
+					cerr << "smash error: > fg – cannot send signal" << endl;
+					return 1;
+				}
 				L_Fg_Cmd.stopped_ = false;
 				send_signal(L_Fg_Cmd.pid_, SIGCONT);
 			}
@@ -238,8 +244,12 @@ int ExeCmd(char* lineSize, char* cmdString, bool background_flag)
 			{
 				if(*its->isStopped())
 				{
+					if(send_signal(its->getPID(), SIGCONT))
+					{
+						cerr << "smash error: > bg – cannot send signal" << endl;
+						return 1;
+					}
 					cout << its->getName() << endl;
-//					rep_kill(*its->getPID, sigACTION); // TODO rep_kill func and signal sigACTION
 					*its->isStopped() = false;
 					return 0;
 					break;
@@ -262,8 +272,12 @@ int ExeCmd(char* lineSize, char* cmdString, bool background_flag)
 				std::advance(its, cmd_num-1);
 				if(*its->isStopped())
 				{
-					cout << its->getName() << endl; // TODO change to char*
-//					rep_kill(*its->getPID(), sigACTION); // TODO rep_kill func and signal sigACTION
+					if(send_signal(its->getPID(), SIGCONT))
+					{
+						cerr << "smash error: > bg – cannot send signal" << endl;
+						return 1;
+					}
+					cout << its->getName() << endl;
 					*its->isStopped() = false;
 					return 0;	
 				}
@@ -296,11 +310,11 @@ int ExeCmd(char* lineSize, char* cmdString, bool background_flag)
 			for (its = jobs.begin(); its != jobs.end(); its++)
 			{
 				success = false;
-//				rep_kill(*its->getPID(), SIGTERM);  // TODO rep_kill func and signal SIGTERM
+				send_signal(its->getPID(), SIGTERM);
 				waitpid(its->getPID(), &status, WUNTRACED);
-				start_time = clock();
-				end_time = 5000 + start_time; // 5 sec wait
-				while(clock() <= end_time) // beasy wait?? TODO
+				start_time = clock()/CLOCKS_PER_SEC;
+				end_time = 5 + start_time; // 5 sec wait
+				while((clock()/CLOCKS_PER_SEC) <= end_time) // TODO check
 				{
 					if (WIFSIGNALED(status)) // if killing success
 					{
@@ -311,8 +325,8 @@ int ExeCmd(char* lineSize, char* cmdString, bool background_flag)
 				}
 				if (!success)
 				{
-//					rep_kill(*its->getPID() ,SIGKILL);  // TODO rep_kill func and signal SIGKILL
-					cout << "Done." << endl; // TODO SIGKILL mast success
+					send_signal(its->getPID() ,SIGKILL); // SIGKILL mast success
+					cout << "Done." << endl;
 				}
 			}
 			its = jobs.begin();
@@ -440,23 +454,28 @@ bool BgCmd(char* lineSize)
 
 //**************************************************************************************
 // function name: AddToHistory
-// Description: add commend to history list. if it's allredy full (50) delete the first one first
+// Description: add commend to history list. if it's already full (50) delete the first one first
 // Parameters: command string
 // Returns: void
 //**************************************************************************************
 void AddToHistory(char* lineSize)
+{
+	if(history.size == MAX_HISTORY_SIZE)
 	{
-		if(history.size == MAX_HISTORY_SIZE)
-		{
-			history.pop_front;
-		}
-		history.push_back(lineSize);	
+		history.pop_front;
 	}
+	history.push_back(lineSize);
+}
+
 
 void stop_job(){
 	if (fgExcites){
 		job new_job = job(L_Fg_Cmd);
-		send_signal(new_job.getPID(), SIGTSTP);
+		if(send_signal(new_job.getPID(), SIGTSTP))
+		{
+			cerr << "smash error: > Ctrl-Z - cannot send signal" << endl;
+			return;
+		}
 		new_job.stopped_ = true;
 		new_job.time_ = time(NULL);
 		jobs.push_back(new_job);
@@ -465,10 +484,22 @@ void stop_job(){
 
 void kill_job(){
 	if (fgExcites){
-		send_signal(L_Fg_Cmd.getPID(), SIGINT);
+		if(send_signal(L_Fg_Cmd.getPID(), SIGINT))
+		{
+			cerr << "smash error: > Ctrl-Z - cannot send signal" << endl;
+			return;
+		}
+		delete L_Fg_Cmd;
+		fgExcites = false;
 	}
 }
 
+//**************************************************************************************
+// function name: RemoveFinishJob
+// Description: Remove finish job from job list
+// Parameters: No arguments
+// Returns: void
+//**************************************************************************************
 void RemoveFinishJob()
 {
 	int status;

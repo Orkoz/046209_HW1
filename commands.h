@@ -21,11 +21,15 @@ using namespace std;
 #define MAX_ARG 20
 #define MAX_PATH_SIZE 250
 #define MAX_HISTORY_SIZE 50
-char* ExeComp(char* lineSize);
-int BgCmd(char* lineSize, void* jobs);
+
 int ExeCmd(void* jobs, char* lineSize, char* cmdString);
 void ExeExternal(char *args[MAX_ARG], char* cmdString);
+char* ExeComp(char* lineSize);
+int BgCmd(char* lineSize, void* jobs);
+void AddToHistory(char* lineSize);
 void stop_job();
+void kill_job();
+void RemoveFinishJob();
 
 #endif
 
